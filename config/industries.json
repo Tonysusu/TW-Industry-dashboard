@@ -1,0 +1,124 @@
+{
+  "industries": [
+    {
+      "id": "memory",
+      "name": "記憶體",
+      "name_en": "Memory",
+      "sub_industries": [
+        {
+          "id": "wafer_idm",
+          "name": "晶圓製造 / IDM",
+          "stocks": [
+            {"code": "2408", "name": "南亞科"},
+            {"code": "2337", "name": "旺宏"},
+            {"code": "2344", "name": "華邦電"}
+          ]
+        },
+        {
+          "id": "ctrl_ic",
+          "name": "控制 IC / IC 設計",
+          "stocks": [
+            {"code": "8299", "name": "群聯"},
+            {"code": "3006", "name": "晶豪科"},
+            {"code": "6531", "name": "愛普"}
+          ]
+        },
+        {
+          "id": "module",
+          "name": "模組廠",
+          "stocks": [
+            {"code": "3260", "name": "威剛"},
+            {"code": "2451", "name": "創見"},
+            {"code": "5289", "name": "宜鼎"},
+            {"code": "4967", "name": "十銓"},
+            {"code": "8271", "name": "宇瞻"}
+          ]
+        },
+        {
+          "id": "pkg_test",
+          "name": "封裝測試",
+          "stocks": [
+            {"code": "6239", "name": "力成"},
+            {"code": "8110", "name": "華東"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "silicon_wafer",
+      "name": "矽晶圓",
+      "name_en": "Silicon Wafers",
+      "sub_industries": [
+        {
+          "id": "semi_wafer",
+          "name": "半導體矽晶圓",
+          "stocks": [
+            {"code": "6488", "name": "環球晶"},
+            {"code": "5483", "name": "中美晶"},
+            {"code": "3532", "name": "台勝科"},
+            {"code": "6182", "name": "合晶"}
+          ]
+        },
+        {
+          "id": "compound_semi",
+          "name": "化合物半導體 / 磊晶",
+          "stocks": [
+            {"code": "3016", "name": "嘉晶"},
+            {"code": "3707", "name": "漢磊"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "passive",
+      "name": "被動元件",
+      "name_en": "Passive Components",
+      "sub_industries": [
+        {
+          "id": "mlcc",
+          "name": "整合 / MLCC",
+          "stocks": [
+            {"code": "2327", "name": "國巨"},
+            {"code": "2492", "name": "華新科"},
+            {"code": "3026", "name": "禾伸堂"}
+          ]
+        },
+        {
+          "id": "resistor",
+          "name": "晶片電阻 / 保護元件",
+          "stocks": [
+            {"code": "2478", "name": "大毅"},
+            {"code": "2428", "name": "興勤"},
+            {"code": "3624", "name": "光頡"}
+          ]
+        },
+        {
+          "id": "inductor",
+          "name": "電感 / 射頻元件",
+          "stocks": [
+            {"code": "3357", "name": "臺慶科"},
+            {"code": "6284", "name": "佳邦"},
+            {"code": "6155", "name": "鈞寶"}
+          ]
+        },
+        {
+          "id": "capacitor",
+          "name": "電解電容 / 固態電容",
+          "stocks": [
+            {"code": "6449", "name": "鈺邦"},
+            {"code": "2472", "name": "立隆電"},
+            {"code": "2375", "name": "凱美"}
+          ]
+        },
+        {
+          "id": "material",
+          "name": "材料 / 通路",
+          "stocks": [
+            {"code": "6173", "name": "信昌電"},
+            {"code": "3090", "name": "日電貿"}
+          ]
+        }
+      ]
+    }
+  ]
+}

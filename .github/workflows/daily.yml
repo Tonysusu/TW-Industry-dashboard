@@ -1,0 +1,38 @@
+name: Daily Update
+
+on:
+  schedule:
+    - cron: '30 9 * * 1-5'   # 台灣 17:30（UTC 09:30），週一到週五
+  workflow_dispatch:           # 允許手動觸發
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy
+
+      - name: Fetch & calculate
+        run: python scripts/fetch_and_calc.py
+
+      - name: Embed data into HTML
+        run: python scripts/embed_data.py
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/indicators.json index.html
+          git diff --cached --quiet || git commit -m "daily update $(date -u +%Y-%m-%d)"
+          git push

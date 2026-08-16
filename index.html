@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>台股產業儀表板</title>
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --bg2:       #181c24;
+      --bg3:       #1e2330;
+      --bg4:       #252b3b;
+      --border:    #2a3044;
+      --text:      #e2e8f0;
+      --text2:     #94a3b8;
+      --text3:     #64748b;
+      --green:     #22c55e;
+      --lime:      #84cc16;
+      --orange:    #f97316;
+      --red:       #ef4444;
+      --gray:      #64748b;
+      --blue:      #3b82f6;
+      --accent:    #6366f1;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .header-left .subtitle {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .last-updated {
+      font-size: 11px;
+      color: var(--text3);
+      text-align: right;
+    }
+
+    /* ── Main ───────────────────────────────────────────────────────────── */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    /* ── Legend ─────────────────────────────────────────────────────────── */
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text2);
+    }
+
+    /* ── Industry Block ──────────────────────────────────────────────────── */
+    .industry-block {
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* ── Row base ───────────────────────────────────────────────────────── */
+    .row {
+      display: grid;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      user-select: none;
+    }
+
+    .row:hover { background: var(--bg4); }
+
+    /* industry row: dot | name | cmf-bar | breadth-120 | breadth-20 | drawdown | chevron */
+    .row-industry {
+      background: var(--bg2);
+      grid-template-columns: 10px 1fr 160px 72px 72px 72px 16px;
+    }
+
+    /* sub-industry row */
+    .row-sub {
+      background: var(--bg3);
+      border-top: 1px solid var(--border);
+      grid-template-columns: 10px 1fr 160px 72px 72px 72px 16px;
+      padding-left: 32px;
+    }
+
+    .row-sub:first-child { border-top: 1px solid var(--border); }
+
+    /* stock row */
+    .row-stock {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      grid-template-columns: 10px 52px 1fr 80px 72px 72px 72px;
+      padding-left: 56px;
+      cursor: default;
+      font-size: 12px;
+    }
+
+    .row-stock:hover { background: var(--bg2); }
+
+    /* column headers */
+    .col-headers {
+      display: grid;
+      gap: 12px;
+      padding: 6px 16px 6px 56px;
+      background: var(--bg3);
+      border-top: 1px solid var(--border);
+      color: var(--text3);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      grid-template-columns: 10px 52px 1fr 80px 72px 72px 72px;
+    }
+
+    /* table headers for industry/sub level */
+    .table-header {
+      display: grid;
+      gap: 12px;
+      padding: 6px 16px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      color: var(--text3);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      grid-template-columns: 10px 1fr 160px 72px 72px 72px 16px;
+    }
+
+    /* ── Status Dot ─────────────────────────────────────────────────────── */
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot.bull_stable   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot.bull_volatile { background: var(--lime);  box-shadow: 0 0 6px var(--lime); }
+    .dot.bull_weak     { background: var(--orange); }
+    .dot.bear          { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+    .dot.neutral       { background: var(--gray); }
+    .dot.unknown       { background: var(--gray); opacity: 0.4; }
+
+    /* ── Name ───────────────────────────────────────────────────────────── */
+    .name-cell { display: flex; flex-direction: column; }
+    .name-zh   { font-weight: 500; }
+    .name-en   { font-size: 11px; color: var(--text3); }
+    .name-code { font-size: 11px; color: var(--text3); font-family: monospace; }
+
+    /* ── CMF Bar ─────────────────────────────────────────────────────────── */
+    .cmf-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cmf-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: var(--bg4);
+      border-radius: 3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cmf-bar-fill {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .cmf-bar-fill.pos { background: var(--green); left: 50%; }
+    .cmf-bar-fill.neg { background: var(--red);   right: 50%; }
+
+    .cmf-val {
+      font-size: 11px;
+      font-family: monospace;
+      width: 44px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .cmf-val.pos { color: var(--green); }
+    .cmf-val.neg { color: var(--red); }
+    .cmf-val.zero { color: var(--text3); }
+
+    /* ── Breadth / Drawdown ──────────────────────────────────────────────── */
+    .metric {
+      font-size: 12px;
+      font-family: monospace;
+      text-align: right;
+    }
+
+    .metric.high   { color: var(--green); }
+    .metric.mid    { color: var(--lime); }
+    .metric.low    { color: var(--orange); }
+    .metric.vlow   { color: var(--red); }
+    .metric.neutral { color: var(--text2); }
+
+    /* ── Chevron ─────────────────────────────────────────────────────────── */
+    .chevron {
+      color: var(--text3);
+      font-size: 10px;
+      transition: transform 0.2s;
+      justify-self: end;
+    }
+
+    .chevron.open { transform: rotate(90deg); }
+
+    /* ── Expand sections ─────────────────────────────────────────────────── */
+    .sub-section  { display: none; }
+    .sub-section.open  { display: block; }
+    .stock-section { display: none; }
+    .stock-section.open { display: block; }
+
+    /* ── Loading / Error ─────────────────────────────────────────────────── */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text3);
+    }
+
+    .error-msg {
+      background: #2d1515;
+      border: 1px solid #7f1d1d;
+      border-radius: 8px;
+      padding: 16px;
+      color: #fca5a5;
+      margin: 20px 0;
+    }
+
+    /* ── Mobile ──────────────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      header { padding: 12px 16px; }
+
+      .row-industry,
+      .row-sub,
+      .table-header {
+        grid-template-columns: 10px 1fr 120px 60px 16px;
+      }
+
+      .row-stock,
+      .col-headers {
+        grid-template-columns: 10px 44px 1fr 60px 60px;
+      }
+
+      /* hide drawdown col on mobile */
+      .hide-mobile { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>台股產業儀表板</h1>
+    <div class="subtitle">產業牛熊 · 資金流向 · 市場寬度</div>
+  </div>
+  <div class="last-updated" id="lastUpdated">載入中…</div>
+</header>
+
+<main>
+  <div class="legend">
+    <div class="legend-item"><span class="dot bull_stable"></span> 多頭穩定</div>
+    <div class="legend-item"><span class="dot bull_volatile"></span> 多頭動盪</div>
+    <div class="legend-item"><span class="dot bull_weak"></span> 多頭偏弱</div>
+    <div class="legend-item"><span class="dot bear"></span> 空頭</div>
+    <div class="legend-item" style="margin-left:auto; color:var(--text3); font-size:11px;">
+      CMF = Chaikin Money Flow (20日) &nbsp;·&nbsp; MA站上比 = 站上均線個股比例 &nbsp;·&nbsp; 平均回檔 = 距一年高點平均跌幅
+    </div>
+  </div>
+
+  <div id="dashboard">
+    <div class="loading">資料載入中…</div>
+  </div>
+</main>
+<script>const INLINE_DATA = {"last_updated": "2026-08-16", "industries": [{"id": "memory", "name": "記憶體", "name_en": "Memory", "sub_industries": [{"id": "wafer_idm", "name": "晶圓製造 / IDM", "summary": {"bull_bear": "bull_stable", "cmf_20": -0.0871, "breadth_20": 1.0, "breadth_120": 0.6667, "avg_drawdown": 0.1463, "stock_count": 3}, "stocks": [{"code": "2408", "name": "南亞科", "ticker": "2408.TW", "indicators": {"close": 512.0, "ma20": 431.1, "ma120": 328.57, "high_1y": 514.0, "drawdown": 0.0039, "cmf_20": -0.0372, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_stable"}}, {"code": "2337", "name": "旺宏", "ticker": "2337.TW", "indicators": {"close": 137.0, "ma20": 121.82, "ma120": 138.84, "high_1y": 185.5, "drawdown": 0.2615, "cmf_20": -0.12, "above_ma20": true, "above_ma120": false, "bull_bear": "bear"}}, {"code": "2344", "name": "華邦電", "ticker": "2344.TW", "indicators": {"close": 183.5, "ma20": 158.7, "ma120": 137.74, "high_1y": 222.0, "drawdown": 0.1734, "cmf_20": -0.1042, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_volatile"}}]}, {"id": "ctrl_ic", "name": "控制 IC / IC 設計", "summary": {"bull_bear": "bull_volatile", "cmf_20": 0.0061, "breadth_20": 1.0, "breadth_120": 1.0, "avg_drawdown": 0.1661, "stock_count": 3}, "stocks": [{"code": "8299", "name": "群聯", "ticker": "8299.TWO", "indicators": {"close": 2080.0, "ma20": 1877.0, "ma120": 2051.07, "high_1y": 2859.12, "drawdown": 0.2725, "cmf_20": -0.1149, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "3006", "name": "晶豪科", "ticker": "3006.TW", "indicators": {"close": 273.5, "ma20": 224.0, "ma120": 201.17, "high_1y": 277.5, "drawdown": 0.0144, "cmf_20": 0.281, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_stable"}}, {"code": "6531", "name": "愛普", "ticker": "6531.TW", "indicators": {"close": 932.0, "ma20": 817.6, "ma120": 786.92, "high_1y": 1181.89, "drawdown": 0.2114, "cmf_20": -0.1477, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}]}, {"id": "module", "name": "模組廠", "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.0049, "breadth_20": 1.0, "breadth_120": 1.0, "avg_drawdown": 0.1621, "stock_count": 5}, "stocks": [{"code": "3260", "name": "威剛", "ticker": "3260.TWO", "indicators": {"close": 402.0, "ma20": 393.0, "ma120": 394.58, "high_1y": 508.0, "drawdown": 0.2087, "cmf_20": -0.288, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "2451", "name": "創見", "ticker": "2451.TW", "indicators": {"close": 292.5, "ma20": 273.8, "ma120": 265.73, "high_1y": 348.93, "drawdown": 0.1617, "cmf_20": 0.1433, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_volatile"}}, {"code": "5289", "name": "宜鼎", "ticker": "5289.TWO", "indicators": {"close": 1475.0, "ma20": 1381.0, "ma120": 1386.28, "high_1y": 1990.0, "drawdown": 0.2588, "cmf_20": -0.0866, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "4967", "name": "十銓", "ticker": "4967.TW", "indicators": {"close": 275.0, "ma20": 244.32, "ma120": 248.15, "high_1y": 304.5, "drawdown": 0.0969, "cmf_20": 0.1161, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_stable"}}, {"code": "8271", "name": "宇瞻", "ticker": "8271.TW", "indicators": {"close": 233.0, "ma20": 219.22, "ma120": 192.81, "high_1y": 254.54, "drawdown": 0.0846, "cmf_20": 0.0905, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_stable"}}]}, {"id": "pkg_test", "name": "封裝測試", "summary": {"bull_bear": "neutral", "cmf_20": -0.2069, "breadth_20": 1.0, "breadth_120": 0.5, "avg_drawdown": 0.3518, "stock_count": 2}, "stocks": [{"code": "6239", "name": "力成", "ticker": "6239.TW", "indicators": {"close": 278.0, "ma20": 263.73, "ma120": 259.03, "high_1y": 371.68, "drawdown": 0.252, "cmf_20": -0.2443, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "8110", "name": "華東", "ticker": "8110.TW", "indicators": {"close": 46.85, "ma20": 42.45, "ma120": 50.41, "high_1y": 85.44, "drawdown": 0.4516, "cmf_20": -0.1695, "above_ma20": true, "above_ma120": false, "bull_bear": "bear"}}]}], "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.0524, "breadth_20": 1.0, "breadth_120": 0.8462, "avg_drawdown": 0.1886, "stock_count": 13}}, {"id": "silicon_wafer", "name": "矽晶圓", "name_en": "Silicon Wafers", "sub_industries": [{"id": "semi_wafer", "name": "半導體矽晶圓", "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.2063, "breadth_20": 1.0, "breadth_120": 1.0, "avg_drawdown": 0.3445, "stock_count": 4}, "stocks": [{"code": "6488", "name": "環球晶", "ticker": "6488.TWO", "indicators": {"close": 1010.0, "ma20": 974.3, "ma120": 778.92, "high_1y": 1509.17, "drawdown": 0.3308, "cmf_20": -0.1353, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "5483", "name": "中美晶", "ticker": "5483.TWO", "indicators": {"close": 188.0, "ma20": 186.59, "ma120": 153.44, "high_1y": 275.03, "drawdown": 0.3164, "cmf_20": -0.3105, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "3532", "name": "台勝科", "ticker": "3532.TW", "indicators": {"close": 356.0, "ma20": 341.32, "ma120": 262.05, "high_1y": 523.0, "drawdown": 0.3193, "cmf_20": -0.0429, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "6182", "name": "合晶", "ticker": "6182.TWO", "indicators": {"close": 111.5, "ma20": 106.76, "ma120": 77.66, "high_1y": 189.5, "drawdown": 0.4116, "cmf_20": -0.3366, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}]}, {"id": "compound_semi", "name": "化合物半導體 / 磊晶", "summary": {"bull_bear": "neutral", "cmf_20": -0.1189, "breadth_20": 1.0, "breadth_120": 0.5, "avg_drawdown": 0.3362, "stock_count": 2}, "stocks": [{"code": "3016", "name": "嘉晶", "ticker": "3016.TW", "indicators": {"close": 102.5, "ma20": 96.18, "ma120": 93.74, "high_1y": 151.89, "drawdown": 0.3252, "cmf_20": -0.0563, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "3707", "name": "漢磊", "ticker": "3707.TWO", "indicators": {"close": 65.6, "ma20": 60.62, "ma120": 67.79, "high_1y": 100.5, "drawdown": 0.3473, "cmf_20": -0.1814, "above_ma20": true, "above_ma120": false, "bull_bear": "bear"}}]}], "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.1772, "breadth_20": 1.0, "breadth_120": 0.8333, "avg_drawdown": 0.3418, "stock_count": 6}}, {"id": "passive", "name": "被動元件", "name_en": "Passive Components", "sub_industries": [{"id": "mlcc", "name": "整合 / MLCC", "summary": {"bull_bear": "bull_volatile", "cmf_20": 0.0132, "breadth_20": 1.0, "breadth_120": 1.0, "avg_drawdown": 0.4392, "stock_count": 3}, "stocks": [{"code": "2327", "name": "國巨", "ticker": "2327.TW", "indicators": {"close": 622.0, "ma20": 593.83, "ma120": 550.03, "high_1y": 1140.0, "drawdown": 0.4544, "cmf_20": -0.1678, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "2492", "name": "華新科", "ticker": "2492.TW", "indicators": {"close": 302.5, "ma20": 266.25, "ma120": 269.71, "high_1y": 613.74, "drawdown": 0.5071, "cmf_20": 0.0513, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "3026", "name": "禾伸堂", "ticker": "3026.TW", "indicators": {"close": 647.0, "ma20": 582.83, "ma120": 450.22, "high_1y": 1005.0, "drawdown": 0.3562, "cmf_20": 0.156, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}]}, {"id": "resistor", "name": "晶片電阻 / 保護元件", "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.0504, "breadth_20": 1.0, "breadth_120": 1.0, "avg_drawdown": 0.4038, "stock_count": 3}, "stocks": [{"code": "2478", "name": "大毅", "ticker": "2478.TW", "indicators": {"close": 128.0, "ma20": 123.45, "ma120": 115.19, "high_1y": 239.33, "drawdown": 0.4652, "cmf_20": -0.2173, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "2428", "name": "興勤", "ticker": "2428.TW", "indicators": {"close": 255.0, "ma20": 234.9, "ma120": 225.22, "high_1y": 343.5, "drawdown": 0.2576, "cmf_20": -0.0376, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "3624", "name": "光頡", "ticker": "3624.TWO", "indicators": {"close": 89.5, "ma20": 78.81, "ma120": 83.34, "high_1y": 175.05, "drawdown": 0.4887, "cmf_20": 0.1036, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}]}, {"id": "inductor", "name": "電感 / 射頻元件", "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.1556, "breadth_20": 1.0, "breadth_120": 0.6667, "avg_drawdown": 0.3469, "stock_count": 3}, "stocks": [{"code": "3357", "name": "臺慶科", "ticker": "3357.TWO", "indicators": {"close": 228.5, "ma20": 210.68, "ma120": 214.57, "high_1y": 342.11, "drawdown": 0.3321, "cmf_20": -0.049, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "6284", "name": "佳邦", "ticker": "6284.TWO", "indicators": {"close": 77.7, "ma20": 76.75, "ma120": 86.87, "high_1y": 121.66, "drawdown": 0.3613, "cmf_20": -0.2135, "above_ma20": true, "above_ma120": false, "bull_bear": "bear"}}, {"code": "6155", "name": "鈞寶", "ticker": "6155.TW", "indicators": {"close": 63.7, "ma20": 55.6, "ma120": 58.63, "high_1y": 97.59, "drawdown": 0.3473, "cmf_20": -0.2044, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}]}, {"id": "capacitor", "name": "電解電容 / 固態電容", "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.1902, "breadth_20": 0.6667, "breadth_120": 0.6667, "avg_drawdown": 0.4612, "stock_count": 3}, "stocks": [{"code": "6449", "name": "鈺邦", "ticker": "6449.TW", "indicators": {"close": 233.5, "ma20": 232.9, "ma120": 245.48, "high_1y": 458.46, "drawdown": 0.4907, "cmf_20": -0.2255, "above_ma20": true, "above_ma120": false, "bull_bear": "bear"}}, {"code": "2472", "name": "立隆電", "ticker": "2472.TW", "indicators": {"close": 245.0, "ma20": 245.07, "ma120": 241.43, "high_1y": 453.5, "drawdown": 0.4598, "cmf_20": -0.181, "above_ma20": false, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "2375", "name": "凱美", "ticker": "2375.TW", "indicators": {"close": 130.5, "ma20": 125.68, "ma120": 123.06, "high_1y": 230.24, "drawdown": 0.4332, "cmf_20": -0.1641, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}]}, {"id": "material", "name": "材料 / 通路", "summary": {"bull_bear": "bull_volatile", "cmf_20": 0.2819, "breadth_20": 1.0, "breadth_120": 1.0, "avg_drawdown": 0.4418, "stock_count": 2}, "stocks": [{"code": "6173", "name": "信昌電", "ticker": "6173.TWO", "indicators": {"close": 210.0, "ma20": 172.7, "ma120": 158.26, "high_1y": 348.19, "drawdown": 0.3969, "cmf_20": 0.4756, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}, {"code": "3090", "name": "日電貿", "ticker": "3090.TW", "indicators": {"close": 174.5, "ma20": 156.05, "ma120": 165.24, "high_1y": 340.0, "drawdown": 0.4868, "cmf_20": 0.0882, "above_ma20": true, "above_ma120": true, "bull_bear": "bull_weak"}}]}], "summary": {"bull_bear": "bull_volatile", "cmf_20": -0.0418, "breadth_20": 0.9286, "breadth_120": 0.8571, "avg_drawdown": 0.4169, "stock_count": 14}}]};</script>
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function dot(cls) {
+  return `<span class="dot ${cls || 'unknown'}"></span>`;
+}
+
+function cmfBar(val) {
+  if (val == null || isNaN(val)) return `<div class="cmf-wrap"><div class="cmf-bar-bg"></div><span class="cmf-val zero">—</span></div>`;
+  const pct = Math.min(Math.abs(val) * 100, 50); // max 50% of bar
+  const dir = val >= 0 ? 'pos' : 'neg';
+  const label = (val >= 0 ? '+' : '') + val.toFixed(3);
+  return `
+    <div class="cmf-wrap">
+      <div class="cmf-bar-bg">
+        <div class="cmf-bar-fill ${dir}" style="width:${pct}%"></div>
+      </div>
+      <span class="cmf-val ${dir}">${label}</span>
+    </div>`;
+}
+
+function breadthCell(val) {
+  if (val == null) return `<span class="metric neutral">—</span>`;
+  const pct = Math.round(val * 100);
+  const cls = pct >= 70 ? 'high' : pct >= 50 ? 'mid' : pct >= 30 ? 'low' : 'vlow';
+  return `<span class="metric ${cls}">${pct}%</span>`;
+}
+
+function drawdownCell(val) {
+  if (val == null) return `<span class="metric neutral hide-mobile">—</span>`;
+  const pct = Math.round(val * 100);
+  const cls = pct <= 5 ? 'high' : pct <= 12 ? 'mid' : pct <= 20 ? 'low' : 'vlow';
+  return `<span class="metric ${cls} hide-mobile">-${pct}%</span>`;
+}
+
+function bullBearLabel(code) {
+  const map = {
+    bull_stable: '多頭穩', bull_volatile: '多頭震',
+    bull_weak: '多頭弱', bear: '空頭', neutral: '過渡', unknown: '—'
+  };
+  return map[code] || code;
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+
+function renderStock(s) {
+  const ind = s.indicators;
+  if (!ind) {
+    return `
+      <div class="row row-stock">
+        ${dot('unknown')}
+        <span class="name-code">${s.code}</span>
+        <span class="name-zh" style="color:var(--text3)">${s.name} (無資料)</span>
+        <span></span><span></span><span></span><span></span>
+      </div>`;
+  }
+  return `
+    <div class="row row-stock">
+      ${dot(ind.bull_bear)}
+      <span class="name-code">${s.code}</span>
+      <span class="name-cell">
+        <span class="name-zh">${s.name}</span>
+      </span>
+      <span class="metric neutral" style="text-align:right">${ind.close.toLocaleString()}</span>
+      ${cmfBar(ind.cmf_20)}
+      ${breadthCell(ind.above_ma120 != null ? (ind.above_ma120 ? 1 : 0) : null)}
+      ${drawdownCell(ind.drawdown)}
+    </div>`;
+}
+
+function renderSub(sub, indId) {
+  const s = sub.summary || {};
+  const subId = `${indId}_${sub.id}`;
+  const stocks = sub.stocks || [];
+  return `
+    <div class="sub-section open" id="sub_${indId}">
+      <div class="col-headers hide-mobile" style="display:none"></div>
+      <div class="row row-sub" onclick="toggleStocks('${subId}')">
+        ${dot(s.bull_bear)}
+        <span class="name-cell">
+          <span class="name-zh">${sub.name}</span>
+          <span class="name-en">${s.stock_count || 0} 支</span>
+        </span>
+        ${cmfBar(s.cmf_20)}
+        ${breadthCell(s.breadth_120)}
+        ${breadthCell(s.breadth_20)}
+        ${drawdownCell(s.avg_drawdown)}
+        <span class="chevron" id="chev_${subId}">▶</span>
+      </div>
+      <div class="stock-section" id="stocks_${subId}">
+        <div class="col-headers">
+          <span></span>
+          <span>代號</span>
+          <span>名稱</span>
+          <span style="text-align:right">收盤</span>
+          <span>CMF(20)</span>
+          <span style="text-align:right">MA120</span>
+          <span style="text-align:right" class="hide-mobile">回檔</span>
+        </div>
+        ${stocks.map(renderStock).join('')}
+      </div>
+    </div>`;
+}
+
+function renderIndustry(ind) {
+  const s = ind.summary || {};
+  const subs = ind.sub_industries || [];
+  return `
+    <div class="industry-block">
+      <div class="table-header">
+        <span></span>
+        <span>產業</span>
+        <span>CMF (20日)</span>
+        <span style="text-align:right">MA120站上</span>
+        <span style="text-align:right">MA20站上</span>
+        <span style="text-align:right" class="hide-mobile">平均回檔</span>
+        <span></span>
+      </div>
+      <div class="row row-industry" onclick="toggleSub('${ind.id}')">
+        ${dot(s.bull_bear)}
+        <span class="name-cell">
+          <span class="name-zh">${ind.name}</span>
+          <span class="name-en">${ind.name_en}</span>
+        </span>
+        ${cmfBar(s.cmf_20)}
+        ${breadthCell(s.breadth_120)}
+        ${breadthCell(s.breadth_20)}
+        ${drawdownCell(s.avg_drawdown)}
+        <span class="chevron open" id="chev_${ind.id}">▶</span>
+      </div>
+      ${subs.map(sub => renderSub(sub, ind.id)).join('')}
+    </div>`;
+}
+
+// ── Toggle ───────────────────────────────────────────────────────────────────
+
+function toggleSub(indId) {
+  document.querySelectorAll(`#sub_${indId}`).forEach(el => {
+    el.classList.toggle('open');
+  });
+  const chev = document.getElementById(`chev_${indId}`);
+  if (chev) chev.classList.toggle('open');
+}
+
+function toggleStocks(subId) {
+  const el = document.getElementById(`stocks_${subId}`);
+  if (el) el.classList.toggle('open');
+  const chev = document.getElementById(`chev_${subId}`);
+  if (chev) chev.classList.toggle('open');
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+
+async function init() {
+  const dash = document.getElementById('dashboard');
+  try {
+    let data;
+    // file:// 協定無法用 fetch，改讀內嵌資料
+    if (location.protocol === 'file:' && typeof INLINE_DATA !== 'undefined') {
+      data = INLINE_DATA;
+    } else {
+      const resp = await fetch('data/indicators.json?' + Date.now());
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      data = await resp.json();
+    }
+
+    document.getElementById('lastUpdated').innerHTML =
+      `更新日期：${data.last_updated}`;
+
+    dash.innerHTML = (data.industries || []).map(renderIndustry).join('');
+  } catch (e) {
+    dash.innerHTML = `<div class="error-msg">❌ 資料載入失敗：${e.message}<br>
+      <small>請確認 data/indicators.json 存在，或重新執行 fetch_and_calc.py</small></div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
