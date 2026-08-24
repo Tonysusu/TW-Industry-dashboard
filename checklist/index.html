@@ -141,10 +141,10 @@ async function fetchText(url) {
   return r.text();
 }
 
-// ── 快取 ──
+// ── 快取（存 Promise，避免並行重複 fetch）──
 const _cache = {};
-async function cached(key, fn) {
-  if (!_cache[key]) _cache[key] = await fn();
+function cached(key, fn) {
+  if (!_cache[key]) _cache[key] = fn();  // 儲存 Promise 本身
   return _cache[key];
 }
 
@@ -312,19 +312,22 @@ async function checkMargin(stockNo) {
   const toN = s => parseInt(String(s).replace(/,/g,'')) || 0;
 
   // TWSE 上市
+  // 注意：TWSE 融資餘額單位為「張」，融券餘額單位為「股」，需除以1000換算
   const twseData = await getMargin();
   const twseHit = (twseData.data || []).find(r => String(r[0]).trim() === stockNo);
   if (twseHit) {
-    const note      = twseHit[14].trim();
-    const marginBal = toN(twseHit[6]);
-    const marginLim = toN(twseHit[7]);
-    const shortBal  = toN(twseHit[12]);
-    const usePct    = marginLim > 0 ? (marginBal / marginLim * 100).toFixed(1) : '0.0';
-    const srPct     = marginBal > 0 ? (shortBal / marginBal * 100).toFixed(1) : null;
+    const note       = twseHit[14].trim();
+    const marginBal  = toN(twseHit[6]);           // 張
+    const marginLim  = toN(twseHit[7]);           // 張
+    const shortBalSh = toN(twseHit[12]);          // 股（原始）
+    const shortBal   = Math.round(shortBalSh / 1000); // 換算成張
+    const usePct     = marginLim > 0 ? (marginBal / marginLim * 100).toFixed(1) : '0.0';
+    const srPct      = marginBal > 0 ? (shortBal  / marginBal  * 100).toFixed(1) : null;
     return buildMarginLines(note, marginBal, marginLim, shortBal, usePct, srPct, '');
   }
 
-  // TPEx 上櫃
+  // TPEx 上櫃（資/券皆為「張」，使用率直接由 API 提供）
+  let tpexFailed = false;
   try {
     const tpexData = await getTpexMargin();
     const rows = tpexData.tables?.[0]?.data || [];
@@ -333,12 +336,13 @@ async function checkMargin(stockNo) {
       const note      = String(hit[19] || '').trim();
       const marginBal = toN(hit[6]);
       const shortBal  = toN(hit[14]);
-      const usePct    = String(hit[8]);   // TPEx 直接提供 %
-      const srPct     = String(hit[16]);
+      const usePct    = parseFloat(hit[8]).toFixed(1);
+      const srPct     = marginBal > 0 ? (shortBal / marginBal * 100).toFixed(1) : null;
       return buildMarginLines(note, marginBal, 0, shortBal, usePct, srPct, '（上櫃）');
     }
-  } catch(e) {}
+  } catch(e) { tpexFailed = true; }
 
+  if (tpexFailed) return [row('warn', '⚠️ 融資：上市查無資料，上櫃資料暫時無法取得')];
   return [row('warn', '⚠️ 融資：查無資料（可能未開放信用交易）')];
 }
 
@@ -516,16 +520,26 @@ async function checkOne(stockNo) {
   ]);
   const links = checkLinks(stockNo);
 
-  // 判斷是否查無資料（代號不存在）
-  const noMargin  = margin.length === 1 && margin[0].includes('查無資料');
-  const noPunish  = punish.includes('無');
-  const noNotice  = notice.includes('無');
-  const noExright = exright.includes('未來30天無');
+  // 判斷是否查無資料
+  const noMargin      = margin.length === 1 && margin[0].includes('查無資料');
+  const tpexUncertain = margin.length === 1 && margin[0].includes('上櫃資料暫時無法取得');
+  const noPunish      = punish.includes('無');
+  const noNotice      = notice.includes('無');
+  const noExright     = exright.includes('未來30天無');
+
   if (!name && noMargin && noPunish && noNotice && noExright) {
+    if (tpexUncertain) {
+      // TPEx proxy 失敗，不能確定股票不存在
+      return `
+        <div class="result-block" style="border-color:#f5c518">
+          <h2 style="color:#c07800">⚠️ ${stockNo}｜上市查無，上櫃暫時無法確認</h2>
+          <div class="row warn">若為上櫃股票，上櫃資料服務暫時無法連線，請稍後再試。</div>
+        </div>`;
+    }
     return `
       <div class="result-block" style="border-color:#f5c6cb">
         <h2 style="color:#c0392b">⚠️ ${stockNo}｜查無此股票</h2>
-        <div class="row warn">代號 ${stockNo} 查無資料，請確認代號是否正確（本工具僅支援上市/上櫃普通股）。</div>
+        <div class="row warn">上市/上櫃均查無此代號，請確認是否輸入正確。</div>
       </div>`;
   }
 
