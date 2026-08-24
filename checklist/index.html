@@ -401,10 +401,27 @@ document.getElementById('stockInput').addEventListener('keydown', e => {
   }
 });
 
+// ── 股票名稱查詢 ──
+async function getStockName(stockNo) {
+  // 先從 TWT93U（融資融券）取名稱
+  const marginData = await getMargin();
+  const hit = (marginData.data || []).find(r => String(r[0]).trim() === stockNo);
+  if (hit) return hit[1].trim();
+  // 再從注意股取
+  const noticeData = await getNotice();
+  const nh = (noticeData.data || []).find(r => String(r[1]).trim() === stockNo);
+  if (nh) return nh[2].trim();
+  // 再從處置股取
+  const punishData = await getPunish();
+  const ph = (punishData.data || []).find(r => String(r[2]).trim() === stockNo);
+  if (ph) return ph[3].trim();
+  return '';
+}
+
 // ── 主流程 ──
 async function checkOne(stockNo) {
-  const sections = [];
-  const [punish, notice, margin, exright, futures] = await Promise.all([
+  const [name, punish, notice, margin, exright, futures] = await Promise.all([
+    getStockName(stockNo),
     checkPunish(stockNo),
     checkNotice(stockNo),
     checkMargin(stockNo),
@@ -413,10 +430,24 @@ async function checkOne(stockNo) {
   ]);
   const links = checkLinks(stockNo);
 
+  // 判斷是否查無資料（代號不存在）
+  const noMargin  = margin.length === 1 && margin[0].includes('查無資料');
+  const noPunish  = punish.includes('無');
+  const noNotice  = notice.includes('無');
+  const noExright = exright.includes('未來30天無');
+  if (!name && noMargin && noPunish && noNotice && noExright) {
+    return `
+      <div class="result-block" style="border-color:#f5c6cb">
+        <h2 style="color:#c0392b">⚠️ ${stockNo}｜查無此股票</h2>
+        <div class="row warn">代號 ${stockNo} 在 TWSE 查無資料，請確認是否輸入錯誤，或此股票為 OTC（興櫃/上櫃）股票。</div>
+      </div>`;
+  }
+
+  const title = name ? `${stockNo}｜${name}` : stockNo;
   const all = [notice, punish, ...margin, exright, ...futures, ...links].join('');
   return `
     <div class="result-block">
-      <h2>股票 ${stockNo}</h2>
+      <h2>📊 ${title}</h2>
       ${all}
     </div>`;
 }
