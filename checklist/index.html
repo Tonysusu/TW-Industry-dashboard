@@ -34,6 +34,12 @@
     min-width: 80px; flex: 1; background: transparent;
     padding: 2px 0;
   }
+  #addBtn {
+    padding: 4px 12px; background: #1a6fd8; color: #fff;
+    border: none; border-radius: 20px; font-size: 0.85rem;
+    cursor: pointer; white-space: nowrap; flex: none; max-width: none;
+  }
+  #addBtn:hover { background: #155bb5; }
 
   .btn-row { display: flex; gap: 8px; margin-bottom: 16px; }
   button {
@@ -83,7 +89,8 @@
 
 <div class="tag-box" id="tagBox" onclick="document.getElementById('stockInput').focus()">
   <!-- tags inserted here by JS -->
-  <input type="text" id="stockInput" placeholder="輸入代號，按 Enter 新增" maxlength="6" inputmode="numeric">
+  <input type="text" id="stockInput" placeholder="輸入代號" maxlength="6" inputmode="numeric">
+  <button id="addBtn" onclick="addFromInput()" type="button">＋新增</button>
 </div>
 <div class="btn-row">
   <button id="queryBtn" onclick="runCheck()">查詢</button>
@@ -91,9 +98,9 @@
 </div>
 <div class="guide">
   <b>操作方式</b><br>
-  ① 在框內輸入股票代號（4~6碼）→ 按 <b>Enter</b> 新增標籤<br>
+  ① 在框內輸入股票代號（4~6碼）→ 按 <b>＋新增</b> 或鍵盤 <b>Enter</b> 新增標籤<br>
   ② 可重複新增多檔，標籤上的 <b>×</b> 可刪除單一檔<br>
-  ③ 按 <b>查詢</b> 一次跑完所有股票（或在空白框按 Enter 也可觸發）<br>
+  ③ 按 <b>查詢</b> 一次跑完所有股票<br>
   ④ 按 <b>清除</b> 全部重來<br>
   <b>顏色說明</b>：🟢 正常｜🟡 注意｜🔴 警示/風險｜🔵 公告資訊
 </div>
@@ -300,8 +307,8 @@ async function checkFutures(stockNo) {
 
 function checkLinks(stockNo) {
   return [
-    row('link', `📋 重大訊息：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">MOPS →</a> <span class="link-note">查增資、減資、GDR、CB 等可能影響股價結構的事件，進場前確認近期有無異動</span>`),
-    row('link', `📅 法說會：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">MOPS →</a> <span class="link-note">確認近期有無法說會，法說會前後股價波動較大，避免在法說會前夕進場承擔不對稱風險</span>`),
+    row('link', `📋 重大訊息：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">開啟 MOPS（已帶入 ${stockNo}，進頁面按查詢）→</a> <span class="link-note">查增資、減資、GDR、CB 等可能影響股價結構的事件</span>`),
+    row('link', `📅 法說會：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">開啟 MOPS（已帶入 ${stockNo}，進頁面按查詢）→</a> <span class="link-note">法說會前後波動大，確認近期有無排定</span>`),
   ];
 }
 
@@ -325,6 +332,12 @@ function addTag(val) {
   if (!code || tags.includes(code)) return;
   tags.push(code);
   renderTags();
+}
+
+function addFromInput() {
+  const input = document.getElementById('stockInput');
+  if (input.value.trim()) { addTag(input.value); input.value = ''; }
+  input.focus();
 }
 
 function removeTag(i) {
