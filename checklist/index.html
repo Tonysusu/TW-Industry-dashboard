@@ -59,9 +59,16 @@
   .bad  { color: #c0392b; font-weight: bold; }
   .info { color: #1a6fd8; }
   .link a { color: #1a6fd8; font-size: 0.85rem; }
+  .link-note { font-size: 0.8rem; color: #888; margin-left: 4px; }
 
   #loading { color: #888; font-size: 0.9rem; margin: 12px 0; }
   #error   { color: #c0392b; font-size: 0.9rem; margin: 12px 0; }
+
+  .guide {
+    background: #f0f4ff; border: 1px solid #c8d8f8; border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 16px; font-size: 0.82rem; color: #444; line-height: 1.8;
+  }
+  .guide b { color: #1a4fa0; }
 
   @media (max-width: 480px) {
     body { padding: 12px; }
@@ -82,7 +89,14 @@
   <button id="queryBtn" onclick="runCheck()">查詢</button>
   <button id="clearBtn" onclick="clearAll()">清除</button>
 </div>
-<div class="hint">輸入股票代號後按 Enter 新增，可加多檔，再按查詢</div>
+<div class="guide">
+  <b>操作方式</b><br>
+  ① 在框內輸入股票代號（4~6碼）→ 按 <b>Enter</b> 新增標籤<br>
+  ② 可重複新增多檔，標籤上的 <b>×</b> 可刪除單一檔<br>
+  ③ 按 <b>查詢</b> 一次跑完所有股票（或在空白框按 Enter 也可觸發）<br>
+  ④ 按 <b>清除</b> 全部重來<br>
+  <b>顏色說明</b>：🟢 正常｜🟡 注意｜🔴 警示/風險｜🔵 公告資訊
+</div>
 
 <div id="loading" style="display:none">⏳ 查詢中，請稍候...</div>
 <div id="error"  style="display:none"></div>
@@ -233,9 +247,10 @@ async function checkExRight(stockNo) {
   const endD   = fmtDate(addDays(TODAY, 30));
   const data   = await getExRight(startD, endD);
   const hits   = (data.data || []).filter(r => String(r[1]).trim() === stockNo);
-  if (!hits.length) return row('ok', '✅ 除息/除權：未來30天無');
+  const src = `（資料來源：TWSE TWT49U，查詢區間 ${startD}～${endD}）`;
+  if (!hits.length) return row('ok', `✅ 除息/除權：未來30天無 <span style="font-size:0.78rem;color:#aaa">${src}</span>`);
   return hits.map(r =>
-    row('warn', `⚠️ 除${r[6]==='息'?'息':'權息'}｜日期：${r[0]}｜息值：${r[5]}｜參考價：${r[4]}`)
+    row('warn', `⚠️ 除${r[6]==='息'?'息':'權息'}｜日期：${r[0]}｜息值：${r[5]}｜參考價：${r[4]} <span style="font-size:0.78rem;color:#aaa">${src}</span>`)
   ).join('');
 }
 
@@ -285,8 +300,8 @@ async function checkFutures(stockNo) {
 
 function checkLinks(stockNo) {
   return [
-    row('link', `📋 重大訊息（增資/減資/GDR/CB）：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">MOPS 重大訊息 →</a>`),
-    row('link', `📅 法說會行事曆：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">MOPS 法說會 →</a>`),
+    row('link', `📋 重大訊息：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">MOPS →</a> <span class="link-note">查增資、減資、GDR、CB 等可能影響股價結構的事件，進場前確認近期有無異動</span>`),
+    row('link', `📅 法說會：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">MOPS →</a> <span class="link-note">確認近期有無法說會，法說會前後股價波動較大，避免在法說會前夕進場承擔不對稱風險</span>`),
   ];
 }
 
@@ -348,7 +363,7 @@ async function checkOne(stockNo) {
   ]);
   const links = checkLinks(stockNo);
 
-  const all = [punish, notice, ...margin, exright, ...futures, ...links].join('');
+  const all = [notice, punish, ...margin, exright, ...futures, ...links].join('');
   return `
     <div class="result-block">
       <h2>股票 ${stockNo}</h2>
