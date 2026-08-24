@@ -92,6 +92,7 @@
   <input type="text" id="stockInput" placeholder="輸入代號" maxlength="6" inputmode="numeric">
   <button id="addBtn" onclick="addFromInput()" type="button">＋新增</button>
 </div>
+<div id="inputErr" style="display:none;color:#c0392b;font-size:0.82rem;margin:-6px 0 8px 2px"></div>
 <div class="btn-row">
   <button id="queryBtn" onclick="runCheck()">查詢</button>
   <button id="clearBtn" onclick="clearAll()">清除</button>
@@ -236,19 +237,35 @@ async function checkMargin(stockNo) {
   } else {
     lines.push(row('ok', '✅ 全額交割：否'));
   }
+  const toN = s => parseInt(String(s).replace(/,/g,'')) || 0;
+  const marginBal   = toN(hit[6]);
+  const marginLimit = toN(hit[7]);
+  const shortBal    = toN(hit[12]);
+
   if (note.includes('X')) {
     lines.push(row('bad', `🔴 融資：不開放（${noteDesc}）<span style="font-size:0.78rem;color:#888">｜無法用融資買進，只能現股操作</span>`));
   } else {
-    const bal = parseInt(String(hit[6]).replace(/,/g,'')) || 0;
-    const balNote = bal > 5000000
-      ? `<span style="font-size:0.78rem;color:#c07800">｜餘額偏高，留意融資斷頭賣壓風險</span>`
-      : `<span style="font-size:0.78rem;color:#888">｜融資餘額高代表散戶槓桿重，行情反轉時易加速下跌</span>`;
-    lines.push(row('ok', `✅ 融資開放｜今日餘額：${hit[6]} 股${balNote}`));
+    const usePct = marginLimit > 0 ? (marginBal / marginLimit * 100).toFixed(1) : null;
+    let useTag = '';
+    if (usePct !== null) {
+      const pn = parseFloat(usePct);
+      const uc = pn >= 70 ? '#c0392b' : pn >= 40 ? '#c07800' : '#2a7a2a';
+      useTag = `｜<span style="color:${uc}">使用率 ${usePct}%</span><span style="font-size:0.78rem;color:#888">（使用率高→散戶槓桿重，反轉時賣壓大）</span>`;
+    }
+    lines.push(row('ok', `✅ 融資開放｜餘額：${hit[6]} 股${useTag}`));
   }
+
   if (note.includes('V')) {
     lines.push(row('warn', `⚠️ 融券：不開放 <span style="font-size:0.78rem;color:#888">｜無法放空此股</span>`));
   } else {
-    lines.push(row('', `　 融券餘額：${hit[12]} 股 <span style="font-size:0.78rem;color:#888">｜融券多代表空方部位，若軋空可能急速拉升</span>`));
+    let srTag = '';
+    if (!note.includes('X') && marginBal > 0) {
+      const sr = (shortBal / marginBal * 100).toFixed(1);
+      const pn = parseFloat(sr);
+      const sc = pn >= 25 ? '#c0392b' : pn >= 10 ? '#c07800' : '#2a7a2a';
+      srTag = `｜券資比 <span style="color:${sc}">${sr}%</span><span style="font-size:0.78rem;color:#888">（>25% 空方集中，軋空風險高；<10% 空方少）</span>`;
+    }
+    lines.push(row('', `　 融券餘額：${hit[12]} 股${srTag}`));
   }
   return lines;
 }
@@ -331,10 +348,26 @@ function renderTags() {
   });
 }
 
+function validateCode(raw) {
+  const code = raw.trim().replace(/[^0-9A-Za-z]/g, '');
+  if (!code) return { ok: false, msg: '' };
+  if (!/^\d/.test(code)) return { ok: false, msg: `「${code}」需以數字開頭` };
+  if (code.length < 4 || code.length > 6) return { ok: false, msg: `「${code}」長度應為 4–6 碼` };
+  return { ok: true, code };
+}
+
+function showInputErr(msg) {
+  const el = document.getElementById('inputErr');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
 function addTag(val) {
-  const code = val.trim().replace(/[^0-9A-Za-z]/g, '');
-  if (!code || tags.includes(code)) return;
-  tags.push(code);
+  const v = validateCode(val);
+  if (!v.ok) { showInputErr(v.msg); return; }
+  if (tags.includes(v.code)) { showInputErr(`${v.code} 已在清單中`); return; }
+  showInputErr('');
+  tags.push(v.code);
   renderTags();
 }
 
