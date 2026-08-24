@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台股 Check List</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans TC', monospace, sans-serif; background: #f5f5f5; color: #222; padding: 20px; }
+  h1 { font-size: 1.3rem; margin-bottom: 16px; color: #333; }
+
+  .input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  input[type=text] {
+    padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px;
+    font-size: 1rem; width: 160px;
+  }
+  button {
+    padding: 8px 18px; background: #1a6fd8; color: #fff;
+    border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;
+  }
+  button:hover { background: #155bb5; }
+  button:disabled { background: #aaa; cursor: not-allowed; }
+
+  .hint { font-size: 0.82rem; color: #666; margin-bottom: 20px; }
+
+  .result-block {
+    background: #fff; border: 1px solid #ddd; border-radius: 8px;
+    padding: 16px; margin-bottom: 14px;
+  }
+  .result-block h2 { font-size: 1rem; margin-bottom: 10px; color: #555; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+  .row { padding: 4px 0; font-size: 0.92rem; line-height: 1.6; word-break: break-all; }
+  .ok   { color: #2a7a2a; }
+  .warn { color: #c07800; }
+  .bad  { color: #c0392b; font-weight: bold; }
+  .info { color: #1a6fd8; }
+  .link a { color: #1a6fd8; font-size: 0.85rem; }
+
+  #loading { color: #888; font-size: 0.9rem; margin: 12px 0; }
+  #error   { color: #c0392b; font-size: 0.9rem; margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<h1>📋 台股 Check List</h1>
+
+<div class="input-row">
+  <input type="text" id="stockInput" placeholder="股票代號，例如 2330" maxlength="6">
+  <button id="queryBtn" onclick="runCheck()">查詢</button>
+</div>
+<div class="hint">支援上市（TWSE）股票。多檔請逗號分隔：2330, 2382, 3533</div>
+
+<div id="loading" style="display:none">⏳ 查詢中，請稍候...</div>
+<div id="error"  style="display:none"></div>
+<div id="results"></div>
+
+<script>
+const CORS_PROXY = 'https://corsproxy.io/?url=';
+const TODAY = new Date();
+
+function fmtDate(d) {
+  return d.toISOString().slice(0,10).replace(/-/g,'');
+}
+function addDays(d, n) {
+  const r = new Date(d); r.setDate(r.getDate() + n); return r;
+}
+function rocToDate(roc) {
+  // "115/08/28" → Date
+  const p = roc.trim().split('/');
+  if (p.length < 3) return null;
+  return new Date(parseInt(p[0]) + 1911, parseInt(p[1]) - 1, parseInt(p[2]));
+}
+function daysDiff(d1, d2) {
+  return Math.round((d2 - d1) / 86400000);
+}
+
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+async function fetchText(url) {
+  const r = await fetch(CORS_PROXY + encodeURIComponent(url));
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.text();
+}
+
+// ── 快取 ──
+const _cache = {};
+async function cached(key, fn) {
+  if (!_cache[key]) _cache[key] = await fn();
+  return _cache[key];
+}
+
+// ── 資料拉取 ──
+async function getPunish() {
+  return cached('punish', () => fetchJSON('https://www.twse.com.tw/rwd/zh/announcement/punish?response=json'));
+}
+async function getNotice() {
+  return cached('notice', () => fetchJSON('https://www.twse.com.tw/rwd/zh/announcement/notice?response=json'));
+}
+async function getMargin() {
+  return cached('margin', () => fetchJSON('https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=json&stockNo=2330'));
+}
+async function getExRight(startD, endD) {
+  const key = `exright_${startD}_${endD}`;
+  return cached(key, () => fetchJSON(
+    `https://www.twse.com.tw/rwd/zh/exRight/TWT49U?response=json&startDate=${startD}&endDate=${endD}`
+  ));
+}
+async function getMarginOpen(startD, endD) {
+  const key = `marginopen_${startD}_${endD}`;
+  return cached(key, () => fetchJSON(
+    `https://www.twse.com.tw/rwd/zh/announcement/announcement?startDate=${startD}&endDate=${endD}&keyword=${encodeURIComponent('得為融資融券')}`
+  ));
+}
+async function getFuturesList() {
+  return cached('futures', async () => {
+    const html = await fetchText('https://www.taifex.com.tw/cht/2/stockLists');
+    const codes = [...html.matchAll(/\b([0-9]{4,5})\b/g)].map(m => m[1]);
+    return new Set(codes);
+  });
+}
+async function getTaifexAnnouncements() {
+  return cached('taifex_ann', async () => {
+    return fetchText('https://www.taifex.com.tw/cht/11/announcement');
+  });
+}
+
+// ── 各項檢查 ──
+function row(cls, text) {
+  return `<div class="row ${cls}">${text}</div>`;
+}
+
+async function checkPunish(stockNo) {
+  const data = await getPunish();
+  const hits = (data.data || []).filter(r => String(r[2]).trim() === stockNo);
+  if (!hits.length) return row('ok', '✅ 處置股：無');
+  const r0 = hits[0];
+  const endStr = r0[6].split('～').pop().trim();
+  const endDate = rocToDate(endStr);
+  const days = endDate ? daysDiff(TODAY, endDate) + 1 : '?';
+  return row('bad', `🔴 處置股中｜期間：${r0[6]}｜距解除：${days}天｜${r0[4]}累計，${r0[5]}`);
+}
+
+async function checkNotice(stockNo) {
+  const data = await getNotice();
+  const hits = (data.data || []).filter(r => String(r[1]).trim() === stockNo);
+  if (!hits.length) return row('ok', '✅ 注意股：無');
+  const r0 = hits[0];
+  const count = parseInt(r0[3]) || 0;
+  const reason = r0[4].replace(/<[^>]+>/g, '');
+  let cls, icon;
+  if (count >= 3)    { cls = 'bad';  icon = '🔴 高警示（即將被處置）'; }
+  else if (count==2) { cls = 'warn'; icon = '⚠️ 警示（再累計可能被處置）'; }
+  else               { cls = 'warn'; icon = '📌 注意股（首次）'; }
+  return row(cls, `${icon}｜累計：${count}次｜${r0[5]}收盤：${r0[6]}｜${reason}`);
+}
+
+const NOTE_MAP = {
+  'X':   '停止融資',
+  'V':   '停止融券',
+  'XV':  '全額交割（停止融資+融券）',
+  'XV!': '全額交割+額外限制',
+  'V!':  '停止融券+額外限制',
+  'Y':   '特殊交易類別',
+  'Z':   '其他限制',
+};
+
+async function checkMargin(stockNo) {
+  const data = await getMargin();
+  const hit = (data.data || []).find(r => String(r[0]).trim() === stockNo);
+  if (!hit) return [row('warn', '⚠️ 融資：查無資料（可能未開放信用交易）')];
+
+  const note = hit[14].trim();
+  const noteDesc = NOTE_MAP[note] || (note ? `限制代碼：${note}` : '');
+  const lines = [];
+
+  if (note.includes('XV')) {
+    lines.push(row('bad', `🔴 全額交割股｜${noteDesc}`));
+  } else {
+    lines.push(row('ok', '✅ 全額交割：否'));
+  }
+  if (note.includes('X')) {
+    lines.push(row('bad', `🔴 融資：不開放（${noteDesc}）`));
+  } else {
+    lines.push(row('ok', `✅ 融資開放｜今日餘額：${hit[6]} 股`));
+  }
+  if (note.includes('V')) {
+    lines.push(row('warn', '⚠️ 融券：不開放'));
+  } else {
+    lines.push(row('', `　 融券餘額：${hit[12]} 股`));
+  }
+  return lines;
+}
+
+async function checkExRight(stockNo) {
+  const startD = fmtDate(TODAY);
+  const endD   = fmtDate(addDays(TODAY, 30));
+  const data   = await getExRight(startD, endD);
+  const hits   = (data.data || []).filter(r => String(r[1]).trim() === stockNo);
+  if (!hits.length) return row('ok', '✅ 除息/除權：未來30天無');
+  return hits.map(r =>
+    row('warn', `⚠️ 除${r[6]==='息'?'息':'權息'}｜日期：${r[0]}｜息值：${r[5]}｜參考價：${r[4]}`)
+  ).join('');
+}
+
+async function checkFutures(stockNo) {
+  const lines = [];
+  try {
+    const codes = await getFuturesList();
+    if (codes.has(stockNo)) lines.push(row('ok', '✅ 已有股票期貨'));
+    else lines.push(row('', '　 無股票期貨'));
+  } catch(e) {
+    lines.push(row('warn', '⚠️ 期貨清單查詢失敗'));
+  }
+
+  // 即將開放期貨（TAIFEX公告）
+  try {
+    const html = await getTaifexAnnouncements();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    for (const tr of doc.querySelectorAll('table tr')) {
+      const cells = tr.querySelectorAll('td');
+      if (cells.length < 2) continue;
+      const title = cells[1].textContent.trim();
+      if (title.includes(stockNo) && title.includes('新增') && title.includes('期貨')) {
+        lines.push(row('info', `📢 即將/新增期貨｜${cells[0].textContent.trim()}｜${title.slice(0,60)}`));
+      }
+    }
+  } catch(e) {}
+
+  // 即將開放融資（TWSE公告）
+  try {
+    const startD = fmtDate(addDays(TODAY, -14));
+    const endD   = fmtDate(addDays(TODAY, 30));
+    const data   = await getMarginOpen(startD, endD);
+    for (const r0 of (data.data || [])) {
+      const title = r0[3] || '';
+      if (!title.includes(stockNo)) continue;
+      const m = title.match(/自(\d+)年(\d+)月(\d+)日起/);
+      if (!m) continue;
+      const openDate = new Date(parseInt(m[1])+1911, parseInt(m[2])-1, parseInt(m[3]));
+      const label = openDate >= TODAY ? '📢 即將開放融資' : 'ℹ️ 近期新開放融資';
+      lines.push(row('info', `${label}｜${openDate.toISOString().slice(0,10)} 起`));
+    }
+  } catch(e) {}
+
+  return lines;
+}
+
+function checkLinks(stockNo) {
+  return [
+    row('link', `📋 重大訊息（增資/減資/GDR/CB）：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">MOPS 重大訊息 →</a>`),
+    row('link', `📅 法說會行事曆：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">MOPS 法說會 →</a>`),
+  ];
+}
+
+// ── 主流程 ──
+async function checkOne(stockNo) {
+  const sections = [];
+  const [punish, notice, margin, exright, futures] = await Promise.all([
+    checkPunish(stockNo),
+    checkNotice(stockNo),
+    checkMargin(stockNo),
+    checkExRight(stockNo),
+    checkFutures(stockNo),
+  ]);
+  const links = checkLinks(stockNo);
+
+  const all = [punish, notice, ...margin, exright, ...futures, ...links].join('');
+  return `
+    <div class="result-block">
+      <h2>股票 ${stockNo}</h2>
+      ${all}
+    </div>`;
+}
+
+async function runCheck() {
+  const raw = document.getElementById('stockInput').value.trim();
+  if (!raw) return;
+  const stocks = raw.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('error').style.display   = 'none';
+  document.getElementById('results').innerHTML      = '';
+  document.getElementById('queryBtn').disabled      = true;
+
+  // 清快取（每次查詢重新拉資料）
+  Object.keys(_cache).forEach(k => delete _cache[k]);
+
+  try {
+    const htmlParts = await Promise.all(stocks.map(checkOne));
+    document.getElementById('results').innerHTML = htmlParts.join('');
+  } catch(e) {
+    document.getElementById('error').textContent = `查詢失敗：${e.message}`;
+    document.getElementById('error').style.display = 'block';
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('queryBtn').disabled      = false;
+  }
+}
+
+// Enter鍵觸發
+document.getElementById('stockInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runCheck();
+});
+</script>
+</body>
+</html>
