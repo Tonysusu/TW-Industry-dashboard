@@ -6,22 +6,47 @@
 <title>台股 Check List</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans TC', monospace, sans-serif; background: #f5f5f5; color: #222; padding: 20px; }
-  h1 { font-size: 1.3rem; margin-bottom: 16px; color: #333; }
+  body { font-family: 'Noto Sans TC', monospace, sans-serif; background: #f5f5f5; color: #222; padding: 16px; }
+  h1 { font-size: 1.3rem; margin-bottom: 14px; color: #333; }
 
-  .input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  input[type=text] {
-    padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px;
-    font-size: 1rem; width: 160px;
+  /* ── Tag input area ── */
+  .tag-box {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    background: #fff; border: 1px solid #ccc; border-radius: 8px;
+    padding: 8px 10px; margin-bottom: 10px; cursor: text;
+    min-height: 44px;
   }
+  .tag-box:focus-within { border-color: #1a6fd8; box-shadow: 0 0 0 2px #d0e4fb; }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #e8f0fe; color: #1a4fa0; border-radius: 20px;
+    padding: 3px 10px 3px 12px; font-size: 0.9rem; white-space: nowrap;
+  }
+  .tag .del {
+    cursor: pointer; font-size: 1rem; line-height: 1; color: #888;
+    padding: 0 2px;
+  }
+  .tag .del:hover { color: #c0392b; }
+
+  #stockInput {
+    border: none; outline: none; font-size: 1rem;
+    min-width: 80px; flex: 1; background: transparent;
+    padding: 2px 0;
+  }
+
+  .btn-row { display: flex; gap: 8px; margin-bottom: 16px; }
   button {
-    padding: 8px 18px; background: #1a6fd8; color: #fff;
-    border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;
+    padding: 10px 20px; background: #1a6fd8; color: #fff;
+    border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;
+    flex: 1; max-width: 160px;
   }
   button:hover { background: #155bb5; }
   button:disabled { background: #aaa; cursor: not-allowed; }
+  #clearBtn { background: #eee; color: #555; }
+  #clearBtn:hover { background: #ddd; }
 
-  .hint { font-size: 0.82rem; color: #666; margin-bottom: 20px; }
+  .hint { font-size: 0.8rem; color: #888; margin-bottom: 18px; }
 
   .result-block {
     background: #fff; border: 1px solid #ddd; border-radius: 8px;
@@ -37,17 +62,27 @@
 
   #loading { color: #888; font-size: 0.9rem; margin: 12px 0; }
   #error   { color: #c0392b; font-size: 0.9rem; margin: 12px 0; }
+
+  @media (max-width: 480px) {
+    body { padding: 12px; }
+    button { font-size: 0.95rem; padding: 10px 14px; }
+    .row { font-size: 0.88rem; }
+  }
 </style>
 </head>
 <body>
 
 <h1>📋 台股 Check List</h1>
 
-<div class="input-row">
-  <input type="text" id="stockInput" placeholder="股票代號，例如 2330" maxlength="6">
-  <button id="queryBtn" onclick="runCheck()">查詢</button>
+<div class="tag-box" id="tagBox" onclick="document.getElementById('stockInput').focus()">
+  <!-- tags inserted here by JS -->
+  <input type="text" id="stockInput" placeholder="輸入代號，按 Enter 新增" maxlength="6" inputmode="numeric">
 </div>
-<div class="hint">支援上市（TWSE）股票。多檔請逗號分隔：2330, 2382, 3533</div>
+<div class="btn-row">
+  <button id="queryBtn" onclick="runCheck()">查詢</button>
+  <button id="clearBtn" onclick="clearAll()">清除</button>
+</div>
+<div class="hint">輸入股票代號後按 Enter 新增，可加多檔，再按查詢</div>
 
 <div id="loading" style="display:none">⏳ 查詢中，請稍候...</div>
 <div id="error"  style="display:none"></div>
@@ -255,6 +290,52 @@ function checkLinks(stockNo) {
   ];
 }
 
+// ── Tag 輸入邏輯 ──
+const tags = [];
+
+function renderTags() {
+  const box = document.getElementById('tagBox');
+  const input = document.getElementById('stockInput');
+  box.querySelectorAll('.tag').forEach(t => t.remove());
+  tags.forEach((code, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.innerHTML = `${code}<span class="del" onclick="removeTag(${i})">×</span>`;
+    box.insertBefore(tag, input);
+  });
+}
+
+function addTag(val) {
+  const code = val.trim().replace(/[^0-9A-Za-z]/g, '');
+  if (!code || tags.includes(code)) return;
+  tags.push(code);
+  renderTags();
+}
+
+function removeTag(i) {
+  tags.splice(i, 1);
+  renderTags();
+}
+
+function clearAll() {
+  tags.length = 0;
+  renderTags();
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('error').style.display = 'none';
+}
+
+document.getElementById('stockInput').addEventListener('keydown', e => {
+  const input = e.target;
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (input.value.trim()) { addTag(input.value); input.value = ''; }
+    else if (tags.length) runCheck();
+  }
+  if (e.key === 'Backspace' && !input.value && tags.length) {
+    removeTag(tags.length - 1);
+  }
+});
+
 // ── 主流程 ──
 async function checkOne(stockNo) {
   const sections = [];
@@ -276,9 +357,11 @@ async function checkOne(stockNo) {
 }
 
 async function runCheck() {
-  const raw = document.getElementById('stockInput').value.trim();
-  if (!raw) return;
-  const stocks = raw.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+  // 若輸入框還有文字尚未 Enter，先加進來
+  const inputEl = document.getElementById('stockInput');
+  if (inputEl.value.trim()) { addTag(inputEl.value); inputEl.value = ''; }
+  if (!tags.length) return;
+  const stocks = [...tags];
 
   document.getElementById('loading').style.display = 'block';
   document.getElementById('error').style.display   = 'none';
@@ -300,10 +383,6 @@ async function runCheck() {
   }
 }
 
-// Enter鍵觸發
-document.getElementById('stockInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') runCheck();
-});
 </script>
 </body>
 </html>
