@@ -237,14 +237,18 @@ async function checkMargin(stockNo) {
     lines.push(row('ok', '✅ 全額交割：否'));
   }
   if (note.includes('X')) {
-    lines.push(row('bad', `🔴 融資：不開放（${noteDesc}）`));
+    lines.push(row('bad', `🔴 融資：不開放（${noteDesc}）<span style="font-size:0.78rem;color:#888">｜無法用融資買進，只能現股操作</span>`));
   } else {
-    lines.push(row('ok', `✅ 融資開放｜今日餘額：${hit[6]} 股`));
+    const bal = parseInt(String(hit[6]).replace(/,/g,'')) || 0;
+    const balNote = bal > 5000000
+      ? `<span style="font-size:0.78rem;color:#c07800">｜餘額偏高，留意融資斷頭賣壓風險</span>`
+      : `<span style="font-size:0.78rem;color:#888">｜融資餘額高代表散戶槓桿重，行情反轉時易加速下跌</span>`;
+    lines.push(row('ok', `✅ 融資開放｜今日餘額：${hit[6]} 股${balNote}`));
   }
   if (note.includes('V')) {
-    lines.push(row('warn', '⚠️ 融券：不開放'));
+    lines.push(row('warn', `⚠️ 融券：不開放 <span style="font-size:0.78rem;color:#888">｜無法放空此股</span>`));
   } else {
-    lines.push(row('', `　 融券餘額：${hit[12]} 股`));
+    lines.push(row('', `　 融券餘額：${hit[12]} 股 <span style="font-size:0.78rem;color:#888">｜融券多代表空方部位，若軋空可能急速拉升</span>`));
   }
   return lines;
 }
@@ -307,8 +311,8 @@ async function checkFutures(stockNo) {
 
 function checkLinks(stockNo) {
   return [
-    row('link', `📋 重大訊息：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">開啟 MOPS（已帶入 ${stockNo}，進頁面按查詢）→</a> <span class="link-note">查增資、減資、GDR、CB 等可能影響股價結構的事件</span>`),
-    row('link', `📅 法說會：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">開啟 MOPS（已帶入 ${stockNo}，進頁面按查詢）→</a> <span class="link-note">法說會前後波動大，確認近期有無排定</span>`),
+    row('link', `📋 重大訊息（增資/減資/GDR/CB）：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">開啟 MOPS →</a> <span class="link-note">進入後手動輸入 <b>${stockNo}</b> 按查詢｜確認近期有無影響股價結構的事件</span>`),
+    row('link', `📅 法說會行事曆：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">開啟 MOPS →</a> <span class="link-note">進入後手動輸入 <b>${stockNo}</b> 按查詢｜法說會前後波動大，避免前夕進場承擔不對稱風險</span>`),
   ];
 }
 
