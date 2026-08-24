@@ -148,7 +148,7 @@ async function cached(key, fn) {
   return _cache[key];
 }
 
-// ── 資料拉取 ──
+// ── 資料拉取 (TWSE 上市) ──
 async function getPunish() {
   return cached('punish', () => fetchJSON('https://www.twse.com.tw/rwd/zh/announcement/punish?response=json'));
 }
@@ -157,6 +157,21 @@ async function getNotice() {
 }
 async function getMargin() {
   return cached('margin', () => fetchJSON('https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=json&stockNo=2330'));
+}
+
+// ── 資料拉取 (TPEx 上櫃，需 proxy) ──
+async function fetchTPExJSON(url) {
+  const text = await fetchText(url);
+  return JSON.parse(text);
+}
+async function getTpexPunish() {
+  return cached('tpex_punish', () => fetchTPExJSON('https://www.tpex.org.tw/www/zh-tw/bulletin/disposal'));
+}
+async function getTpexNotice() {
+  return cached('tpex_notice', () => fetchTPExJSON('https://www.tpex.org.tw/www/zh-tw/bulletin/attention'));
+}
+async function getTpexMargin() {
+  return cached('tpex_margin', () => fetchTPExJSON('https://www.tpex.org.tw/www/zh-tw/margin/balance'));
 }
 async function getExRight(startD, endD) {
   const key = `exright_${startD}_${endD}`;
@@ -189,28 +204,64 @@ function row(cls, text) {
 }
 
 async function checkPunish(stockNo) {
-  const data = await getPunish();
-  const hits = (data.data || []).filter(r => String(r[2]).trim() === stockNo);
-  if (!hits.length) return row('ok', '✅ 處置股：無');
-  const r0 = hits[0];
-  const endStr = r0[6].split('～').pop().trim();
-  const endDate = rocToDate(endStr);
-  const days = endDate ? daysDiff(TODAY, endDate) + 1 : '?';
-  return row('bad', `🔴 處置股中｜期間：${r0[6]}｜距解除：${days}天｜${r0[4]}累計，${r0[5]}`);
+  // TWSE 上市
+  const twse = await getPunish();
+  const twseHits = (twse.data || []).filter(r => String(r[2]).trim() === stockNo);
+  if (twseHits.length) {
+    const r0 = twseHits[0];
+    const endStr = r0[6].split('～').pop().trim();
+    const endDate = rocToDate(endStr);
+    const days = endDate ? daysDiff(TODAY, endDate) + 1 : '?';
+    return row('bad', `🔴 處置股中｜期間：${r0[6]}｜距解除：${days}天｜${r0[4]}累計，${r0[5]}`);
+  }
+  // TPEx 上櫃
+  try {
+    const tpex = await getTpexPunish();
+    const rows = tpex.tables?.[0]?.data || [];
+    const hits = rows.filter(r => String(r[2]).trim() === stockNo);
+    if (hits.length) {
+      const r0 = hits[0];
+      const period = String(r0[5]);
+      const endStr = period.split('~').pop().trim();
+      const endDate = rocToDate(endStr);
+      const days = endDate ? daysDiff(TODAY, endDate) + 1 : '?';
+      return row('bad', `🔴 處置股中（上櫃）｜期間：${period}｜距解除：${days}天｜累計${r0[4]}次`);
+    }
+  } catch(e) {}
+  return row('ok', '✅ 處置股：無');
+}
+
+function noticeLevel(count) {
+  if (count >= 3) return { cls: 'bad',  icon: '🔴 高警示（即將被處置）' };
+  if (count == 2) return { cls: 'warn', icon: '⚠️ 警示（再累計可能被處置）' };
+  return               { cls: 'warn', icon: '📌 注意股（首次）' };
 }
 
 async function checkNotice(stockNo) {
-  const data = await getNotice();
-  const hits = (data.data || []).filter(r => String(r[1]).trim() === stockNo);
-  if (!hits.length) return row('ok', '✅ 注意股：無');
-  const r0 = hits[0];
-  const count = parseInt(r0[3]) || 0;
-  const reason = r0[4].replace(/<[^>]+>/g, '');
-  let cls, icon;
-  if (count >= 3)    { cls = 'bad';  icon = '🔴 高警示（即將被處置）'; }
-  else if (count==2) { cls = 'warn'; icon = '⚠️ 警示（再累計可能被處置）'; }
-  else               { cls = 'warn'; icon = '📌 注意股（首次）'; }
-  return row(cls, `${icon}｜累計：${count}次｜${r0[5]}收盤：${r0[6]}｜${reason}`);
+  // TWSE 上市
+  const twse = await getNotice();
+  const twseHits = (twse.data || []).filter(r => String(r[1]).trim() === stockNo);
+  if (twseHits.length) {
+    const r0 = twseHits[0];
+    const count = parseInt(r0[3]) || 0;
+    const reason = r0[4].replace(/<[^>]+>/g, '');
+    const { cls, icon } = noticeLevel(count);
+    return row(cls, `${icon}｜累計：${count}次｜${r0[5]}收盤：${r0[6]}｜${reason}`);
+  }
+  // TPEx 上櫃
+  try {
+    const tpex = await getTpexNotice();
+    const rows = tpex.tables?.[0]?.data || [];
+    const hits = rows.filter(r => String(r[1]).trim() === stockNo);
+    if (hits.length) {
+      const r0 = hits[0];
+      const count = parseInt(r0[3]) || 0;
+      const reason = String(r0[4]).replace(/<[^>]+>/g, '').slice(0, 80);
+      const { cls, icon } = noticeLevel(count);
+      return row(cls, `${icon}（上櫃）｜累計：${count}次｜${r0[5]}收盤：${r0[6]}｜${reason}`);
+    }
+  } catch(e) {}
+  return row('ok', '✅ 注意股：無');
 }
 
 const NOTE_MAP = {
@@ -223,51 +274,72 @@ const NOTE_MAP = {
   'Z':   '其他限制',
 };
 
-async function checkMargin(stockNo) {
-  const data = await getMargin();
-  const hit = (data.data || []).find(r => String(r[0]).trim() === stockNo);
-  if (!hit) return [row('warn', '⚠️ 融資：查無資料（可能未開放信用交易）')];
-
-  const note = hit[14].trim();
+function buildMarginLines(note, marginBal, marginLimit, shortBal, usePctStr, srPctStr, label) {
+  // label: '' for TWSE, '（上櫃）' for TPEx
   const noteDesc = NOTE_MAP[note] || (note ? `限制代碼：${note}` : '');
   const lines = [];
 
   if (note.includes('XV')) {
-    lines.push(row('bad', `🔴 全額交割股｜${noteDesc}`));
+    lines.push(row('bad', `🔴 全額交割股${label}｜${noteDesc}`));
   } else {
-    lines.push(row('ok', '✅ 全額交割：否'));
+    lines.push(row('ok', `✅ 全額交割：否${label}`));
   }
-  const toN = s => parseInt(String(s).replace(/,/g,'')) || 0;
-  const marginBal   = toN(hit[6]);
-  const marginLimit = toN(hit[7]);
-  const shortBal    = toN(hit[12]);
 
   if (note.includes('X')) {
     lines.push(row('bad', `🔴 融資：不開放（${noteDesc}）<span style="font-size:0.78rem;color:#888">｜無法用融資買進，只能現股操作</span>`));
   } else {
-    const usePct = marginLimit > 0 ? (marginBal / marginLimit * 100).toFixed(1) : null;
-    let useTag = '';
-    if (usePct !== null) {
-      const pn = parseFloat(usePct);
-      const uc = pn >= 70 ? '#c0392b' : pn >= 40 ? '#c07800' : '#2a7a2a';
-      useTag = `｜<span style="color:${uc}">使用率 ${usePct}%</span><span style="font-size:0.78rem;color:#888">（使用率高→散戶槓桿重，反轉時賣壓大）</span>`;
-    }
-    lines.push(row('ok', `✅ 融資開放｜餘額：${hit[6]} 股${useTag}`));
+    const pn = parseFloat(usePctStr);
+    const uc = pn >= 70 ? '#c0392b' : pn >= 40 ? '#c07800' : '#2a7a2a';
+    const useTag = `｜<span style="color:${uc}">使用率 ${usePctStr}%</span><span style="font-size:0.78rem;color:#888">（使用率高→散戶槓桿重，反轉時賣壓大）</span>`;
+    lines.push(row('ok', `✅ 融資開放｜餘額：${marginBal.toLocaleString()} 張${useTag}`));
   }
 
   if (note.includes('V')) {
     lines.push(row('warn', `⚠️ 融券：不開放 <span style="font-size:0.78rem;color:#888">｜無法放空此股</span>`));
   } else {
     let srTag = '';
-    if (!note.includes('X') && marginBal > 0) {
-      const sr = (shortBal / marginBal * 100).toFixed(1);
-      const pn = parseFloat(sr);
+    if (!note.includes('X') && marginBal > 0 && srPctStr !== null) {
+      const pn = parseFloat(srPctStr);
       const sc = pn >= 25 ? '#c0392b' : pn >= 10 ? '#c07800' : '#2a7a2a';
-      srTag = `｜券資比 <span style="color:${sc}">${sr}%</span><span style="font-size:0.78rem;color:#888">（>25% 空方集中，軋空風險高；<10% 空方少）</span>`;
+      srTag = `｜券資比 <span style="color:${sc}">${srPctStr}%</span><span style="font-size:0.78rem;color:#888">（>25% 空方集中，軋空風險高；<10% 空方少）</span>`;
     }
-    lines.push(row('', `　 融券餘額：${hit[12]} 股${srTag}`));
+    lines.push(row('', `　 融券餘額：${shortBal.toLocaleString()} 張${srTag}`));
   }
   return lines;
+}
+
+async function checkMargin(stockNo) {
+  const toN = s => parseInt(String(s).replace(/,/g,'')) || 0;
+
+  // TWSE 上市
+  const twseData = await getMargin();
+  const twseHit = (twseData.data || []).find(r => String(r[0]).trim() === stockNo);
+  if (twseHit) {
+    const note      = twseHit[14].trim();
+    const marginBal = toN(twseHit[6]);
+    const marginLim = toN(twseHit[7]);
+    const shortBal  = toN(twseHit[12]);
+    const usePct    = marginLim > 0 ? (marginBal / marginLim * 100).toFixed(1) : '0.0';
+    const srPct     = marginBal > 0 ? (shortBal / marginBal * 100).toFixed(1) : null;
+    return buildMarginLines(note, marginBal, marginLim, shortBal, usePct, srPct, '');
+  }
+
+  // TPEx 上櫃
+  try {
+    const tpexData = await getTpexMargin();
+    const rows = tpexData.tables?.[0]?.data || [];
+    const hit = rows.find(r => String(r[0]).trim() === stockNo);
+    if (hit) {
+      const note      = String(hit[19] || '').trim();
+      const marginBal = toN(hit[6]);
+      const shortBal  = toN(hit[14]);
+      const usePct    = String(hit[8]);   // TPEx 直接提供 %
+      const srPct     = String(hit[16]);
+      return buildMarginLines(note, marginBal, 0, shortBal, usePct, srPct, '（上櫃）');
+    }
+  } catch(e) {}
+
+  return [row('warn', '⚠️ 融資：查無資料（可能未開放信用交易）')];
 }
 
 async function checkExRight(stockNo) {
@@ -275,10 +347,10 @@ async function checkExRight(stockNo) {
   const endD   = fmtDate(addDays(TODAY, 30));
   const data   = await getExRight(startD, endD);
   const hits   = (data.data || []).filter(r => String(r[1]).trim() === stockNo);
-  const src = `（資料來源：TWSE TWT49U，查詢區間 ${startD}～${endD}）`;
-  if (!hits.length) return row('ok', `✅ 除息/除權：未來30天無 <span style="font-size:0.78rem;color:#aaa">${src}</span>`);
+  const src = `<span style="font-size:0.78rem;color:#aaa">（TWSE TWT49U，${startD}～${endD}，上市股票）</span>`;
+  if (!hits.length) return row('ok', `✅ 除息/除權：未來30天無 ${src}`);
   return hits.map(r =>
-    row('warn', `⚠️ 除${r[6]==='息'?'息':'權息'}｜日期：${r[0]}｜息值：${r[5]}｜參考價：${r[4]} <span style="font-size:0.78rem;color:#aaa">${src}</span>`)
+    row('warn', `⚠️ 除${r[6]==='息'?'息':'權息'}｜日期：${r[0]}｜息值：${r[5]}｜參考價：${r[4]} ${src}`)
   ).join('');
 }
 
@@ -403,18 +475,32 @@ document.getElementById('stockInput').addEventListener('keydown', e => {
 
 // ── 股票名稱查詢 ──
 async function getStockName(stockNo) {
-  // 先從 TWT93U（融資融券）取名稱
+  // TWSE 融資融券
   const marginData = await getMargin();
-  const hit = (marginData.data || []).find(r => String(r[0]).trim() === stockNo);
-  if (hit) return hit[1].trim();
-  // 再從注意股取
+  const mh = (marginData.data || []).find(r => String(r[0]).trim() === stockNo);
+  if (mh) return mh[1].trim();
+  // TWSE 注意股
   const noticeData = await getNotice();
   const nh = (noticeData.data || []).find(r => String(r[1]).trim() === stockNo);
   if (nh) return nh[2].trim();
-  // 再從處置股取
+  // TWSE 處置股
   const punishData = await getPunish();
   const ph = (punishData.data || []).find(r => String(r[2]).trim() === stockNo);
   if (ph) return ph[3].trim();
+  // TPEx 融資融券
+  try {
+    const tpexData = await getTpexMargin();
+    const rows = tpexData.tables?.[0]?.data || [];
+    const th = rows.find(r => String(r[0]).trim() === stockNo);
+    if (th) return th[1].trim() + '（上櫃）';
+  } catch(e) {}
+  // TPEx 注意股
+  try {
+    const tpexNotice = await getTpexNotice();
+    const rows = tpexNotice.tables?.[0]?.data || [];
+    const tn = rows.find(r => String(r[1]).trim() === stockNo);
+    if (tn) return tn[2].trim() + '（上櫃）';
+  } catch(e) {}
   return '';
 }
 
