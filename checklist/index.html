@@ -525,7 +525,7 @@ async function checkOne(stockNo) {
     return `
       <div class="result-block" style="border-color:#f5c6cb">
         <h2 style="color:#c0392b">⚠️ ${stockNo}｜查無此股票</h2>
-        <div class="row warn">代號 ${stockNo} 在 TWSE 查無資料，請確認是否輸入錯誤，或此股票為 OTC（興櫃/上櫃）股票。</div>
+        <div class="row warn">代號 ${stockNo} 查無資料，請確認代號是否正確（本工具僅支援上市/上櫃普通股）。</div>
       </div>`;
   }
 
@@ -539,30 +539,41 @@ async function checkOne(stockNo) {
 }
 
 async function runCheck() {
-  // 若輸入框還有文字尚未 Enter，先加進來
   const inputEl = document.getElementById('stockInput');
   if (inputEl.value.trim()) { addTag(inputEl.value); inputEl.value = ''; }
   if (!tags.length) return;
   const stocks = [...tags];
 
-  document.getElementById('loading').style.display = 'block';
+  const resultsEl = document.getElementById('results');
+  document.getElementById('loading').style.display = 'none';
   document.getElementById('error').style.display   = 'none';
-  document.getElementById('results').innerHTML      = '';
   document.getElementById('queryBtn').disabled      = true;
+  resultsEl.innerHTML = '';
 
-  // 清快取（每次查詢重新拉資料）
-  Object.keys(_cache).forEach(k => delete _cache[k]);
+  // 先插入佔位卡片（立即顯示骨架）
+  stocks.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'result-block';
+    div.id = `card-${s}`;
+    div.innerHTML = `<h2>📊 ${s}</h2><div class="row" style="color:#aaa">⏳ 查詢中…</div>`;
+    resultsEl.appendChild(div);
+  });
 
-  try {
-    const htmlParts = await Promise.all(stocks.map(checkOne));
-    document.getElementById('results').innerHTML = htmlParts.join('');
-  } catch(e) {
-    document.getElementById('error').textContent = `查詢失敗：${e.message}`;
-    document.getElementById('error').style.display = 'block';
-  } finally {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('queryBtn').disabled      = false;
-  }
+  // 各股並行，完成一檔就立即更新該卡片
+  await Promise.all(stocks.map(async s => {
+    try {
+      const html = await checkOne(s);
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html.trim();
+      const card = document.getElementById(`card-${s}`);
+      if (card) card.replaceWith(tmp.firstElementChild);
+    } catch(e) {
+      const card = document.getElementById(`card-${s}`);
+      if (card) card.innerHTML = `<h2 style="color:#c0392b">⚠️ ${s}</h2><div class="row bad">查詢失敗：${e.message}</div>`;
+    }
+  }));
+
+  document.getElementById('queryBtn').disabled = false;
 }
 
 </script>
