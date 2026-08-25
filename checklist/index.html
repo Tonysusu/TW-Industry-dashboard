@@ -181,6 +181,14 @@ async function getMarginOpen(startD, endD) {
     `https://www.twse.com.tw/rwd/zh/announcement/announcement?startDate=${startD}&endDate=${endD}&keyword=${encodeURIComponent('得為融資融券')}`
   ));
 }
+async function getCapitalAnn(keyword) {
+  const key = `capital_${keyword}`;
+  const startD = fmtDate(addDays(TODAY, -90));
+  const endD   = fmtDate(addDays(TODAY,  30));
+  return cached(key, () => fetchJSON(
+    `https://www.twse.com.tw/rwd/zh/announcement/announcement?startDate=${startD}&endDate=${endD}&keyword=${encodeURIComponent(keyword)}`
+  ));
+}
 async function getFuturesList() {
   return cached('futures', async () => {
     const html = await fetchText('https://www.taifex.com.tw/cht/2/stockLists');
@@ -398,9 +406,29 @@ async function checkFutures(stockNo) {
   return lines;
 }
 
+async function checkCapital(stockNo) {
+  const lines = [];
+  const codePattern = new RegExp(`[（(](?:公司|證券)?代號[：:]${stockNo}[）)]`);
+
+  for (const [kw, label, icon] of [
+    ['現金增資', '現金增資', '⚠️'],
+    ['減資',     '減資',     '⚠️'],
+  ]) {
+    try {
+      const data = await getCapitalAnn(kw);
+      const hits = (data.data || []).filter(r => codePattern.test(String(r[3])));
+      for (const h of hits) {
+        const title = String(h[3]).replace(/<[^>]+>/g, '').slice(0, 60);
+        lines.push(row('warn', `${icon} ${label}公告｜${h[1]}｜${title}…`));
+      }
+    } catch(e) {}
+  }
+  return lines;
+}
+
 function checkLinks(stockNo) {
   return [
-    row('link', `📋 重大訊息（增資/減資/GDR/CB）：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">開啟 MOPS →</a> <span class="link-note">進入後手動輸入 <b>${stockNo}</b> 按查詢｜確認近期有無影響股價結構的事件</span>`),
+    row('link', `📋 GDR/CB/重大訊息：<a href="https://mops.twse.com.tw/mops/web/t05st01?step=1&firstin=Y&off=1&co_id=${stockNo}" target="_blank">開啟 MOPS →</a> <span class="link-note">進入後手動輸入 <b>${stockNo}</b> 按查詢｜增減資已自動偵測，GDR/CB 仍需手動確認</span>`),
     row('link', `📅 法說會行事曆：<a href="https://mops.twse.com.tw/mops/web/t100sb01?step=1&firstin=Y&off=1&TYPEK=sii&co_id=${stockNo}" target="_blank">開啟 MOPS →</a> <span class="link-note">進入後手動輸入 <b>${stockNo}</b> 按查詢｜法說會前後波動大，避免前夕進場承擔不對稱風險</span>`),
   ];
 }
@@ -506,13 +534,14 @@ async function getStockName(stockNo) {
 
 // ── 主流程 ──
 async function checkOne(stockNo) {
-  const [name, punish, notice, margin, exright, futures] = await Promise.all([
+  const [name, punish, notice, margin, exright, futures, capital] = await Promise.all([
     getStockName(stockNo),
     checkPunish(stockNo),
     checkNotice(stockNo),
     checkMargin(stockNo),
     checkExRight(stockNo),
     checkFutures(stockNo),
+    checkCapital(stockNo),
   ]);
   const links = checkLinks(stockNo);
 
@@ -540,7 +569,7 @@ async function checkOne(stockNo) {
   }
 
   const title = name ? `${stockNo}｜${name}` : stockNo;
-  const all = [notice, punish, ...margin, exright, ...futures, ...links].join('');
+  const all = [notice, punish, ...margin, exright, ...capital, ...futures, ...links].join('');
   return `
     <div class="result-block">
       <h2>📊 ${title}</h2>
