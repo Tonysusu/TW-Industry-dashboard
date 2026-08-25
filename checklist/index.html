@@ -534,7 +534,7 @@ async function getStockName(stockNo) {
 
 // ── 主流程 ──
 async function checkOne(stockNo) {
-  const [name, punish, notice, margin, exright, futures, capital] = await Promise.all([
+  const [nameRaw, punish, notice, margin, exright, futures, capital] = await Promise.all([
     getStockName(stockNo),
     checkPunish(stockNo),
     checkNotice(stockNo),
@@ -543,6 +543,14 @@ async function checkOne(stockNo) {
     checkFutures(stockNo),
     checkCapital(stockNo),
   ]);
+
+  // 若其他來源找不到名字，嘗試從增資/減資公告標題萃取
+  let name = nameRaw;
+  if (!name && capital.length > 0) {
+    const m = capital[0].match(/】(.+?)(?:股份有限公司|科技|工業|電子)/);
+    if (m) name = m[1].trim() + '…';
+  }
+
   const links = checkLinks(stockNo);
 
   // 判斷是否查無資料
@@ -551,8 +559,9 @@ async function checkOne(stockNo) {
   const noPunish      = punish.includes('無');
   const noNotice      = notice.includes('無');
   const noExright     = exright.includes('未來30天無');
+  const noCapital     = capital.length === 0;
 
-  if (!name && noMargin && noPunish && noNotice && noExright) {
+  if (!name && noMargin && noPunish && noNotice && noExright && noCapital) {
     if (tpexUncertain) {
       // TPEx proxy 失敗，不能確定股票不存在
       return `
