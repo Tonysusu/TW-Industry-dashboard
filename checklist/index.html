@@ -159,19 +159,15 @@ async function getMargin() {
   return cached('margin', () => fetchJSON('https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=json&stockNo=2330'));
 }
 
-// ── 資料拉取 (TPEx 上櫃，需 proxy) ──
-async function fetchTPExJSON(url) {
-  const text = await fetchText(url);
-  return JSON.parse(text);
-}
+// ── 資料拉取 (TPEx 上櫃，讀同網域靜態 JSON，由 GitHub Actions 每日更新) ──
 async function getTpexPunish() {
-  return cached('tpex_punish', () => fetchTPExJSON('https://www.tpex.org.tw/www/zh-tw/bulletin/disposal'));
+  return cached('tpex_punish', () => fetchJSON('./tpex_disposal.json'));
 }
 async function getTpexNotice() {
-  return cached('tpex_notice', () => fetchTPExJSON('https://www.tpex.org.tw/www/zh-tw/bulletin/attention'));
+  return cached('tpex_notice', () => fetchJSON('./tpex_notice.json'));
 }
 async function getTpexMargin() {
-  return cached('tpex_margin', () => fetchTPExJSON('https://www.tpex.org.tw/www/zh-tw/margin/balance'));
+  return cached('tpex_margin', () => fetchJSON('./tpex_margin.json'));
 }
 async function getExRight(startD, endD) {
   const key = `exright_${startD}_${endD}`;
