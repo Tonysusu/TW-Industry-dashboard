@@ -286,13 +286,22 @@ function buildMarginLines(note, marginBal, marginLimit, shortBal, usePctStr, srP
   //   單獨 "X"，但限額/餘額都正常，顯然不是「停止融券」，實際意義未確認，故不當作警示。
   // - "@"、"!" 單獨出現的樣本極少（全市場僅個位數），意義未確認，一律當原始註記顯示，不做判讀。
   // 若之後要精確判讀，請對照 TWSE 官方註記代碼說明文件（未來使用者會自行核對歷史答案）。
+  // 全額交割沒有找到可直接查詢的官方JSON清單（處置股/注意股才有），
+  // 目前只能用 O+X 同時出現「推定」，非官方正式名單，務必標註清楚。
   const n = String(note || '').trim();
   const bothStopped = n.includes('O') && n.includes('X');
   const rawNote = n ? `<span style="font-size:0.78rem;color:#aaa">｜原始註記：${n}（意義未逐一確認）</span>` : '';
   const lines = [];
 
+  // 全額交割（推定）——固定顯示一行
   if (bothStopped) {
-    lines.push(row('bad', `🔴 融資融券同時停止${label}<span style="font-size:0.78rem;color:#888">（常見於全額交割股，實際是否為全額交割請以 MOPS 公告為準）</span>${rawNote}`));
+    lines.push(row('bad', `🔴 全額交割（推定）${label}<span style="font-size:0.78rem;color:#888">｜依融資融券同時停止研判，非官方名單，正式認定請以 MOPS 公告為準</span>${rawNote}`));
+  } else {
+    lines.push(row('ok', `✅ 全額交割（推定）：否${label}`));
+  }
+
+  if (bothStopped) {
+    lines.push(row('bad', `🔴 融資：不開放｜融券：不開放`));
     return lines;
   }
 
