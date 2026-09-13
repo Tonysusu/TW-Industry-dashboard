@@ -22,4 +22,6 @@ if __name__ == "__main__":
     save("tpex_disposal.json", fetch("https://www.tpex.org.tw/www/zh-tw/bulletin/disposal"))
     save("tpex_notice.json",   fetch("https://www.tpex.org.tw/www/zh-tw/bulletin/attention"))
     save("tpex_margin.json",   fetch("https://www.tpex.org.tw/www/zh-tw/margin/balance"))
+    # 上櫃股票除權除息預告表（官方 OpenAPI，找到於 2026-09-13，取代原本查無資料的舊嘗試）
+    save("tpex_exright.json", fetch("https://www.tpex.org.tw/openapi/v1/tpex_exright_prepost"))
     print("TPEx data update complete.")
