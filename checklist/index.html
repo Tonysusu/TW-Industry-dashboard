@@ -111,7 +111,6 @@
 <div id="results"></div>
 
 <script>
-const CORS_PROXY = 'https://corsproxy.io/?url=';
 const TODAY = new Date();
 
 function fmtDate(d) {
@@ -135,12 +134,6 @@ async function fetchJSON(url) {
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
-async function fetchText(url) {
-  const r = await fetch(CORS_PROXY + encodeURIComponent(url));
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.text();
-}
-
 // ── 快取（存 Promise，避免並行重複 fetch）──
 const _cache = {};
 function cached(key, fn) {
@@ -198,17 +191,17 @@ async function getCapitalAnn(keyword) {
     `https://www.twse.com.tw/rwd/zh/announcement/announcement?startDate=${startD}&endDate=${endD}&keyword=${encodeURIComponent(keyword)}`
   ));
 }
+// TAIFEX（期交所）本身沒有CORS支援，且原本靠 corsproxy.io 代理不穩定，
+// 改比照 TPEx 的做法：GitHub Actions 每日在伺服器端直接抓（不受CORS限制），
+// 存成靜態 JSON，網頁讀同網域檔案即可。
 async function getFuturesList() {
   return cached('futures', async () => {
-    const html = await fetchText('https://www.taifex.com.tw/cht/2/stockLists');
-    const codes = [...html.matchAll(/\b([0-9]{4,5})\b/g)].map(m => m[1]);
+    const codes = await fetchJSON('./taifex_futures_codes.json');
     return new Set(codes);
   });
 }
 async function getTaifexAnnouncements() {
-  return cached('taifex_ann', async () => {
-    return fetchText('https://www.taifex.com.tw/cht/11/announcement');
-  });
+  return cached('taifex_ann', () => fetchJSON('./taifex_announcements.json'));
 }
 
 // ── 各項檢查 ──
@@ -414,17 +407,12 @@ async function checkFutures(stockNo) {
     lines.push(row('warn', '⚠️ 期貨清單查詢失敗'));
   }
 
-  // 即將開放期貨（TAIFEX公告）
+  // 即將開放期貨（TAIFEX公告，已在伺服器端解析成 {date,title} 陣列）
   try {
-    const html = await getTaifexAnnouncements();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    for (const tr of doc.querySelectorAll('table tr')) {
-      const cells = tr.querySelectorAll('td');
-      if (cells.length < 2) continue;
-      const title = cells[1].textContent.trim();
-      if (title.includes(stockNo) && title.includes('新增') && title.includes('期貨')) {
-        lines.push(row('info', `📢 即將/新增期貨｜${cells[0].textContent.trim()}｜${title.slice(0,60)}`));
+    const anns = await getTaifexAnnouncements();
+    for (const a of anns) {
+      if (a.title.includes(stockNo) && a.title.includes('新增') && a.title.includes('期貨')) {
+        lines.push(row('info', `📢 即將/新增期貨｜${a.date}｜${a.title.slice(0,60)}`));
       }
     }
   } catch(e) {}
