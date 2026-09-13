@@ -156,7 +156,12 @@ async function getNotice() {
   return cached('notice', () => fetchJSON('https://www.twse.com.tw/rwd/zh/announcement/notice?response=json'));
 }
 async function getMargin() {
-  return cached('margin', () => fetchJSON('https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=json&stockNo=2330'));
+  // 注意：TWT93U 是「信用額度總量管制餘額表」，跟一般融資融券餘額是兩回事（今日餘額常年為0），
+  // 正確資料源是 MI_MARGN 的第二張表「融資融券彙總(全部)」，不需也不支援指定單一股票，整表回傳。
+  return cached('margin', async () => {
+    const d = await fetchJSON('https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?response=json&selectType=ALL');
+    return (d.tables && d.tables[1] && d.tables[1].data) || [];
+  });
 }
 
 // ── 資料拉取 (TPEx 上櫃，讀同網域靜態 JSON，由 GitHub Actions 每日更新) ──
@@ -268,65 +273,58 @@ async function checkNotice(stockNo) {
   return row('ok', '✅ 注意股：無');
 }
 
-const NOTE_MAP = {
-  'X':   '停止融資',
-  'V':   '停止融券',
-  'XV':  '全額交割（停止融資+融券）',
-  'XV!': '全額交割+額外限制',
-  'V!':  '停止融券+額外限制',
-  'Y':   '特殊交易類別',
-  'Z':   '其他限制',
-};
-
+// 註記代碼（依公開資料交叉比對，未逐一對照官方文件，僅供參考）：
+// 大寫 O＝停止融資、大寫 X＝停止融券、@＝融資分配（縮減融資成數）
+// 其餘代碼（如 1/2/6 開頭數字、a/b/c/D 等）意義未逐一確認，原樣顯示原始註記供自行核對
 function buildMarginLines(note, marginBal, marginLimit, shortBal, usePctStr, srPctStr, label) {
   // label: '' for TWSE, '（上櫃）' for TPEx
-  const noteDesc = NOTE_MAP[note] || (note ? `限制代碼：${note}` : '');
+  //
+  // 註記代碼可信度說明（2026-09-13 用真實資料反查驗證過）：
+  // - "O"+"X" 同時出現 → 高信心視為「融資融券同時停止」：驗證樣本全是長期全額交割/雞蛋水餃股
+  //   （限額直接是0，例：大飲、宏洲、中福…），這組合可信。
+  // - 單獨的 "X"（沒有 O）→ 不可信！驗證發現台積電(2330)、桂盟、汎銓等正常活躍股票也會出現
+  //   單獨 "X"，但限額/餘額都正常，顯然不是「停止融券」，實際意義未確認，故不當作警示。
+  // - "@"、"!" 單獨出現的樣本極少（全市場僅個位數），意義未確認，一律當原始註記顯示，不做判讀。
+  // 若之後要精確判讀，請對照 TWSE 官方註記代碼說明文件（未來使用者會自行核對歷史答案）。
+  const n = String(note || '').trim();
+  const bothStopped = n.includes('O') && n.includes('X');
+  const rawNote = n ? `<span style="font-size:0.78rem;color:#aaa">｜原始註記：${n}（意義未逐一確認）</span>` : '';
   const lines = [];
 
-  if (note.includes('XV')) {
-    lines.push(row('bad', `🔴 全額交割股${label}｜${noteDesc}`));
-  } else {
-    lines.push(row('ok', `✅ 全額交割：否${label}`));
+  if (bothStopped) {
+    lines.push(row('bad', `🔴 融資融券同時停止${label}<span style="font-size:0.78rem;color:#888">（常見於全額交割股，實際是否為全額交割請以 MOPS 公告為準）</span>${rawNote}`));
+    return lines;
   }
 
-  if (note.includes('X')) {
-    lines.push(row('bad', `🔴 融資：不開放（${noteDesc}）<span style="font-size:0.78rem;color:#888">｜無法用融資買進，只能現股操作</span>`));
-  } else {
-    const pn = parseFloat(usePctStr);
-    const uc = pn >= 70 ? '#c0392b' : pn >= 40 ? '#c07800' : '#2a7a2a';
-    const useTag = `｜<span style="color:${uc}">使用率 ${usePctStr}%</span><span style="font-size:0.78rem;color:#888">（使用率高→散戶槓桿重，反轉時賣壓大）</span>`;
-    lines.push(row('ok', `✅ 融資開放｜餘額：${marginBal.toLocaleString()} 張${useTag}`));
-  }
+  const pn = parseFloat(usePctStr);
+  const uc = pn >= 70 ? '#c0392b' : pn >= 40 ? '#c07800' : '#2a7a2a';
+  const useTag = `｜<span style="color:${uc}">使用率 ${usePctStr}%</span><span style="font-size:0.78rem;color:#888">（使用率高→散戶槓桿重，反轉時賣壓大）</span>`;
+  lines.push(row('ok', `✅ 融資開放｜餘額：${marginBal.toLocaleString()} 張${useTag}${rawNote}`));
 
-  if (note.includes('V')) {
-    lines.push(row('warn', `⚠️ 融券：不開放 <span style="font-size:0.78rem;color:#888">｜無法放空此股</span>`));
-  } else {
-    let srTag = '';
-    if (!note.includes('X') && marginBal > 0 && srPctStr !== null) {
-      const pn = parseFloat(srPctStr);
-      const sc = pn >= 25 ? '#c0392b' : pn >= 10 ? '#c07800' : '#2a7a2a';
-      srTag = `｜券資比 <span style="color:${sc}">${srPctStr}%</span><span style="font-size:0.78rem;color:#888">（>25% 空方集中，軋空風險高；<10% 空方少）</span>`;
-    }
-    lines.push(row('', `　 融券餘額：${shortBal.toLocaleString()} 張${srTag}`));
+  let srTag = '';
+  if (srPctStr !== null) {
+    const pn2 = parseFloat(srPctStr);
+    const sc = pn2 >= 25 ? '#c0392b' : pn2 >= 10 ? '#c07800' : '#2a7a2a';
+    srTag = `｜券資比 <span style="color:${sc}">${srPctStr}%</span><span style="font-size:0.78rem;color:#888">（>25% 空方集中，軋空風險高；<10% 空方少）</span>`;
   }
+  lines.push(row('', `　 融券餘額：${shortBal.toLocaleString()} 張${srTag}`));
+
   return lines;
 }
 
 async function checkMargin(stockNo) {
   const toN = s => parseInt(String(s).replace(/,/g,'')) || 0;
 
-  // TWSE 上市
-  // 注意：TWSE 融資餘額單位為「張」，融券餘額單位為「股」，需除以1000換算
-  const twseData = await getMargin();
-  const twseHit = (twseData.data || []).find(r => String(r[0]).trim() === stockNo);
+  // TWSE 上市（MI_MARGN 第二張表，融資/融券欄位皆為「張」，不需單位換算）
+  const twseRows = await getMargin();
+  const twseHit = twseRows.find(r => String(r[0]).trim() === stockNo);
   if (twseHit) {
-    const note       = twseHit[14].trim();
-    const marginBal  = toN(twseHit[6]);           // 張
-    const marginLim  = toN(twseHit[7]);           // 張
-    const shortBalSh = toN(twseHit[12]);          // 股（原始）
-    const shortBal   = Math.round(shortBalSh / 1000); // 換算成張
-    const usePct     = marginLim > 0 ? (marginBal / marginLim * 100).toFixed(1) : '0.0';
-    const srPct      = marginBal > 0 ? (shortBal  / marginBal  * 100).toFixed(1) : null;
+    const note      = String(twseHit[15] || '').trim();
+    const marginBal = toN(twseHit[6]);   // 今日餘額（融資，張）
+    const marginLim = toN(twseHit[7]);   // 次一營業日限額（融資，張）
+    const shortBal  = toN(twseHit[12]);  // 今日餘額（融券，張）
+    const usePct    = marginLim > 0 ? (marginBal / marginLim * 100).toFixed(1) : '0.0';
+    const srPct     = marginBal > 0 ? (shortBal  / marginBal  * 100).toFixed(1) : null;
     return buildMarginLines(note, marginBal, marginLim, shortBal, usePct, srPct, '');
   }
 
@@ -504,8 +502,8 @@ document.getElementById('stockInput').addEventListener('keydown', e => {
 // ── 股票名稱查詢 ──
 async function getStockName(stockNo) {
   // TWSE 融資融券
-  const marginData = await getMargin();
-  const mh = (marginData.data || []).find(r => String(r[0]).trim() === stockNo);
+  const marginRows = await getMargin();
+  const mh = marginRows.find(r => String(r[0]).trim() === stockNo);
   if (mh) return mh[1].trim();
   // TWSE 注意股
   const noticeData = await getNotice();
