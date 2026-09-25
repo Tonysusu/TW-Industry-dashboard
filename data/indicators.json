@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-24",
+  "last_updated": "2026-09-25",
   "ticker_cache": {
     "2408": "2408.TW",
     "2337": "2337.TW",
@@ -46,7 +46,7 @@
           "name": "晶圓製造 / IDM",
           "summary": {
             "bull_bear": "bull_volatile",
-            "cmf_20": -0.2593,
+            "cmf_20": -0.2599,
             "breadth_20": 0.0,
             "breadth_120": 0.6667,
             "avg_drawdown": 0.2235,
@@ -63,7 +63,7 @@
                 "ma120": 393.18,
                 "high_1y": 543.0,
                 "drawdown": 0.0737,
-                "cmf_20": -0.2493,
+                "cmf_20": -0.2499,
                 "above_ma20": false,
                 "above_ma120": true,
                 "bull_bear": "bull_stable"
@@ -79,7 +79,7 @@
                 "ma120": 139.26,
                 "high_1y": 185.5,
                 "drawdown": 0.3693,
-                "cmf_20": -0.3051,
+                "cmf_20": -0.3058,
                 "above_ma20": false,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -95,7 +95,7 @@
                 "ma120": 154.28,
                 "high_1y": 222.0,
                 "drawdown": 0.2275,
-                "cmf_20": -0.2234,
+                "cmf_20": -0.2241,
                 "above_ma20": false,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -108,7 +108,7 @@
           "name": "控制 IC / IC 設計",
           "summary": {
             "bull_bear": "bull_volatile",
-            "cmf_20": -0.073,
+            "cmf_20": -0.0728,
             "breadth_20": 0.6667,
             "breadth_120": 1.0,
             "avg_drawdown": 0.1784,
@@ -125,7 +125,7 @@
                 "ma120": 2124.15,
                 "high_1y": 2859.12,
                 "drawdown": 0.2568,
-                "cmf_20": -0.0279,
+                "cmf_20": -0.0262,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -141,7 +141,7 @@
                 "ma120": 228.44,
                 "high_1y": 312.0,
                 "drawdown": 0.1186,
-                "cmf_20": -0.1395,
+                "cmf_20": -0.14,
                 "above_ma20": false,
                 "above_ma120": true,
                 "bull_bear": "bull_volatile"
@@ -157,7 +157,7 @@
                 "ma120": 897.53,
                 "high_1y": 1181.89,
                 "drawdown": 0.1598,
-                "cmf_20": -0.0517,
+                "cmf_20": -0.0523,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_volatile"
@@ -170,7 +170,7 @@
           "name": "模組廠",
           "summary": {
             "bull_bear": "neutral",
-            "cmf_20": -0.4131,
+            "cmf_20": -0.4147,
             "breadth_20": 0.0,
             "breadth_120": 0.4,
             "avg_drawdown": 0.2038,
@@ -187,7 +187,7 @@
                 "ma120": 389.73,
                 "high_1y": 484.93,
                 "drawdown": 0.2205,
-                "cmf_20": -0.3907,
+                "cmf_20": -0.3922,
                 "above_ma20": false,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -203,7 +203,7 @@
                 "ma120": 280.18,
                 "high_1y": 348.93,
                 "drawdown": 0.1847,
-                "cmf_20": -0.2168,
+                "cmf_20": -0.2172,
                 "above_ma20": false,
                 "above_ma120": true,
                 "bull_bear": "bull_volatile"
@@ -219,7 +219,7 @@
                 "ma120": 1455.15,
                 "high_1y": 1928.79,
                 "drawdown": 0.3234,
-                "cmf_20": -0.4151,
+                "cmf_20": -0.4191,
                 "above_ma20": false,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -235,7 +235,7 @@
                 "ma120": 256.11,
                 "high_1y": 294.96,
                 "drawdown": 0.0761,
-                "cmf_20": -0.3473,
+                "cmf_20": -0.3479,
                 "above_ma20": false,
                 "above_ma120": true,
                 "bull_bear": "bull_stable"
@@ -251,7 +251,7 @@
                 "ma120": 210.87,
                 "high_1y": 254.54,
                 "drawdown": 0.2143,
-                "cmf_20": -0.6956,
+                "cmf_20": -0.6969,
                 "above_ma20": false,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -264,7 +264,7 @@
           "name": "封裝測試",
           "summary": {
             "bull_bear": "bull_volatile",
-            "cmf_20": -0.1662,
+            "cmf_20": -0.1664,
             "breadth_20": 1.0,
             "breadth_120": 1.0,
             "avg_drawdown": 0.3271,
@@ -281,7 +281,7 @@
                 "ma120": 275.53,
                 "high_1y": 371.68,
                 "drawdown": 0.2278,
-                "cmf_20": -0.1976,
+                "cmf_20": -0.1978,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -297,7 +297,7 @@
                 "ma120": 48.16,
                 "high_1y": 85.44,
                 "drawdown": 0.4265,
-                "cmf_20": -0.1348,
+                "cmf_20": -0.135,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -308,7 +308,7 @@
       ],
       "summary": {
         "bull_bear": "bull_volatile",
-        "cmf_20": -0.2611,
+        "cmf_20": -0.2619,
         "breadth_20": 0.3077,
         "breadth_120": 0.6923,
         "avg_drawdown": 0.2215,
@@ -325,7 +325,7 @@
           "name": "半導體矽晶圓",
           "summary": {
             "bull_bear": "bull_volatile",
-            "cmf_20": -0.1335,
+            "cmf_20": -0.1339,
             "breadth_20": 1.0,
             "breadth_120": 1.0,
             "avg_drawdown": 0.2963,
@@ -342,7 +342,7 @@
                 "ma120": 903.34,
                 "high_1y": 1509.17,
                 "drawdown": 0.3718,
-                "cmf_20": -0.0885,
+                "cmf_20": -0.0891,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -358,7 +358,7 @@
                 "ma120": 170.2,
                 "high_1y": 275.03,
                 "drawdown": 0.3146,
-                "cmf_20": -0.169,
+                "cmf_20": -0.1696,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -374,7 +374,7 @@
                 "ma120": 326.85,
                 "high_1y": 523.0,
                 "drawdown": 0.1348,
-                "cmf_20": -0.0819,
+                "cmf_20": -0.0823,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_volatile"
@@ -390,7 +390,7 @@
                 "ma120": 96.3,
                 "high_1y": 189.5,
                 "drawdown": 0.3641,
-                "cmf_20": -0.1945,
+                "cmf_20": -0.1948,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -403,7 +403,7 @@
           "name": "化合物半導體 / 磊晶",
           "summary": {
             "bull_bear": "bull_stable",
-            "cmf_20": 0.1083,
+            "cmf_20": 0.1078,
             "breadth_20": 1.0,
             "breadth_120": 1.0,
             "avg_drawdown": 0.1378,
@@ -420,7 +420,7 @@
                 "ma120": 106.07,
                 "high_1y": 160.0,
                 "drawdown": 0.0,
-                "cmf_20": 0.3956,
+                "cmf_20": 0.3949,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_stable"
@@ -436,7 +436,7 @@
                 "ma120": 69.51,
                 "high_1y": 100.5,
                 "drawdown": 0.2756,
-                "cmf_20": -0.179,
+                "cmf_20": -0.1792,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -447,7 +447,7 @@
       ],
       "summary": {
         "bull_bear": "bull_volatile",
-        "cmf_20": -0.0529,
+        "cmf_20": -0.0533,
         "breadth_20": 1.0,
         "breadth_120": 1.0,
         "avg_drawdown": 0.2435,
@@ -464,7 +464,7 @@
           "name": "整合 / MLCC",
           "summary": {
             "bull_bear": "bull_volatile",
-            "cmf_20": -0.114,
+            "cmf_20": -0.1147,
             "breadth_20": 1.0,
             "breadth_120": 0.6667,
             "avg_drawdown": 0.3926,
@@ -481,7 +481,7 @@
                 "ma120": 621.01,
                 "high_1y": 1140.0,
                 "drawdown": 0.4912,
-                "cmf_20": -0.1746,
+                "cmf_20": -0.1752,
                 "above_ma20": true,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -497,7 +497,7 @@
                 "ma120": 310.03,
                 "high_1y": 613.74,
                 "drawdown": 0.4925,
-                "cmf_20": -0.003,
+                "cmf_20": -0.0031,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -513,7 +513,7 @@
                 "ma120": 595.68,
                 "high_1y": 1005.0,
                 "drawdown": 0.194,
-                "cmf_20": -0.1644,
+                "cmf_20": -0.1658,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_volatile"
@@ -526,7 +526,7 @@
           "name": "晶片電阻 / 保護元件",
           "summary": {
             "bull_bear": "bull_volatile",
-            "cmf_20": -0.126,
+            "cmf_20": -0.1261,
             "breadth_20": 0.6667,
             "breadth_120": 0.6667,
             "avg_drawdown": 0.3129,
@@ -559,7 +559,7 @@
                 "ma120": 242.14,
                 "high_1y": 335.46,
                 "drawdown": 0.2398,
-                "cmf_20": -0.2303,
+                "cmf_20": -0.2307,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -575,7 +575,7 @@
                 "ma120": 95.82,
                 "high_1y": 175.05,
                 "drawdown": 0.2002,
-                "cmf_20": 0.1383,
+                "cmf_20": 0.1382,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_weak"
@@ -588,7 +588,7 @@
           "name": "電感 / 射頻元件",
           "summary": {
             "bull_bear": "bear",
-            "cmf_20": -0.2791,
+            "cmf_20": -0.2795,
             "breadth_20": 0.3333,
             "breadth_120": 0.0,
             "avg_drawdown": 0.3901,
@@ -605,7 +605,7 @@
                 "ma120": 227.48,
                 "high_1y": 342.11,
                 "drawdown": 0.3979,
-                "cmf_20": -0.2574,
+                "cmf_20": -0.2577,
                 "above_ma20": false,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -621,7 +621,7 @@
                 "ma120": 86.31,
                 "high_1y": 121.66,
                 "drawdown": 0.3893,
-                "cmf_20": -0.2364,
+                "cmf_20": -0.2363,
                 "above_ma20": false,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -637,7 +637,7 @@
                 "ma120": 61.28,
                 "high_1y": 97.59,
                 "drawdown": 0.3832,
-                "cmf_20": -0.3435,
+                "cmf_20": -0.3445,
                 "above_ma20": true,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -650,7 +650,7 @@
           "name": "電解電容 / 固態電容",
           "summary": {
             "bull_bear": "bear",
-            "cmf_20": -0.3511,
+            "cmf_20": -0.3512,
             "breadth_20": 0.3333,
             "breadth_120": 0.0,
             "avg_drawdown": 0.5145,
@@ -667,7 +667,7 @@
                 "ma120": 260.29,
                 "high_1y": 458.46,
                 "drawdown": 0.543,
-                "cmf_20": -0.347,
+                "cmf_20": -0.3469,
                 "above_ma20": false,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -683,7 +683,7 @@
                 "ma120": 262.15,
                 "high_1y": 446.72,
                 "drawdown": 0.5109,
-                "cmf_20": -0.2254,
+                "cmf_20": -0.2258,
                 "above_ma20": true,
                 "above_ma120": false,
                 "bull_bear": "bear"
@@ -712,7 +712,7 @@
           "name": "材料 / 通路",
           "summary": {
             "bull_bear": "neutral",
-            "cmf_20": -0.2037,
+            "cmf_20": -0.2036,
             "breadth_20": 0.5,
             "breadth_120": 0.5,
             "avg_drawdown": 0.3172,
@@ -729,7 +729,7 @@
                 "ma120": 205.71,
                 "high_1y": 348.19,
                 "drawdown": 0.1197,
-                "cmf_20": -0.0623,
+                "cmf_20": -0.0622,
                 "above_ma20": true,
                 "above_ma120": true,
                 "bull_bear": "bull_volatile"
@@ -756,7 +756,7 @@
       ],
       "summary": {
         "bull_bear": "bear",
-        "cmf_20": -0.2156,
+        "cmf_20": -0.2158,
         "breadth_20": 0.5714,
         "breadth_120": 0.3571,
         "avg_drawdown": 0.3903,
