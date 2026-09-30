@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-29",
+  "last_updated": "2026-09-30",
   "ticker_cache": {
     "2408": "2408.TW",
     "2337": "2337.TW",
@@ -45,11 +45,11 @@
           "id": "wafer_idm",
           "name": "晶圓製造 / IDM",
           "summary": {
-            "bull_bear": "bull_volatile",
-            "cmf_20": -0.2115,
-            "breadth_20": 0.3333,
-            "breadth_120": 0.6667,
-            "avg_drawdown": 0.2152,
+            "bull_bear": "bear",
+            "cmf_20": -0.2472,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 3
           },
           "stocks": [
@@ -58,15 +58,15 @@
               "name": "南亞科",
               "ticker": "2408.TW",
               "indicators": {
-                "close": 506.0,
-                "ma20": 505.62,
-                "ma120": 395.55,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 543.0,
-                "drawdown": 0.0681,
-                "cmf_20": -0.2077,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_stable"
+                "drawdown": null,
+                "cmf_20": -0.2148,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -74,15 +74,15 @@
               "name": "旺宏",
               "ticker": "2337.TW",
               "indicators": {
-                "close": 118.5,
-                "ma20": 120.4,
-                "ma120": 138.99,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 185.5,
-                "drawdown": 0.3612,
-                "cmf_20": -0.2671,
+                "drawdown": null,
+                "cmf_20": -0.2964,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -90,15 +90,15 @@
               "name": "華邦電",
               "ticker": "2344.TW",
               "indicators": {
-                "close": 174.0,
-                "ma20": 174.18,
-                "ma120": 154.93,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 222.0,
-                "drawdown": 0.2162,
-                "cmf_20": -0.1596,
+                "drawdown": null,
+                "cmf_20": -0.2303,
                 "above_ma20": false,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -107,11 +107,11 @@
           "id": "ctrl_ic",
           "name": "控制 IC / IC 設計",
           "summary": {
-            "bull_bear": "bull_volatile",
-            "cmf_20": -0.0596,
-            "breadth_20": 0.6667,
-            "breadth_120": 0.6667,
-            "avg_drawdown": 0.1869,
+            "bull_bear": "bear",
+            "cmf_20": -0.1344,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 3
           },
           "stocks": [
@@ -120,15 +120,15 @@
               "name": "群聯",
               "ticker": "8299.TWO",
               "indicators": {
-                "close": 2115.0,
-                "ma20": 2071.5,
-                "ma120": 2127.5,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 2859.12,
-                "drawdown": 0.2603,
-                "cmf_20": -0.0146,
-                "above_ma20": true,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "drawdown": null,
+                "cmf_20": -0.1351,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -136,15 +136,15 @@
               "name": "晶豪科",
               "ticker": "3006.TW",
               "indicators": {
-                "close": 285.0,
-                "ma20": 284.75,
-                "ma120": 229.49,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 312.0,
-                "drawdown": 0.0865,
-                "cmf_20": -0.1062,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_stable"
+                "drawdown": null,
+                "cmf_20": -0.1802,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -152,15 +152,15 @@
               "name": "愛普",
               "ticker": "6531.TW",
               "indicators": {
-                "close": 929.0,
-                "ma20": 952.65,
-                "ma120": 901.31,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 1181.89,
-                "drawdown": 0.214,
-                "cmf_20": -0.0581,
+                "drawdown": null,
+                "cmf_20": -0.088,
                 "above_ma20": false,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -169,11 +169,11 @@
           "id": "module",
           "name": "模組廠",
           "summary": {
-            "bull_bear": "neutral",
-            "cmf_20": -0.3883,
-            "breadth_20": 0.2,
-            "breadth_120": 0.4,
-            "avg_drawdown": 0.2067,
+            "bull_bear": "bear",
+            "cmf_20": -0.3949,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 5
           },
           "stocks": [
@@ -182,15 +182,15 @@
               "name": "威剛",
               "ticker": "3260.TWO",
               "indicators": {
-                "close": 377.0,
-                "ma20": 384.84,
-                "ma120": 389.78,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 484.93,
-                "drawdown": 0.2226,
-                "cmf_20": -0.3849,
+                "drawdown": null,
+                "cmf_20": -0.4061,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -198,15 +198,15 @@
               "name": "創見",
               "ticker": "2451.TW",
               "indicators": {
-                "close": 286.0,
-                "ma20": 284.7,
-                "ma120": 280.58,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 348.93,
-                "drawdown": 0.1804,
-                "cmf_20": -0.1657,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_volatile"
+                "drawdown": null,
+                "cmf_20": -0.1988,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -214,15 +214,15 @@
               "name": "宜鼎",
               "ticker": "5289.TWO",
               "indicators": {
-                "close": 1280.0,
-                "ma20": 1332.75,
-                "ma120": 1457.13,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 1928.79,
-                "drawdown": 0.3364,
-                "cmf_20": -0.4067,
+                "drawdown": null,
+                "cmf_20": -0.4032,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -230,15 +230,15 @@
               "name": "十銓",
               "ticker": "4967.TW",
               "indicators": {
-                "close": 272.0,
-                "ma20": 275.12,
-                "ma120": 256.56,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 294.96,
-                "drawdown": 0.0778,
-                "cmf_20": -0.3348,
+                "drawdown": null,
+                "cmf_20": -0.3499,
                 "above_ma20": false,
-                "above_ma120": true,
-                "bull_bear": "bull_stable"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -246,15 +246,15 @@
               "name": "宇瞻",
               "ticker": "8271.TW",
               "indicators": {
-                "close": 199.5,
-                "ma20": 210.78,
-                "ma120": 211.27,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 254.54,
-                "drawdown": 0.2162,
-                "cmf_20": -0.6494,
+                "drawdown": null,
+                "cmf_20": -0.6164,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -263,11 +263,11 @@
           "id": "pkg_test",
           "name": "封裝測試",
           "summary": {
-            "bull_bear": "bull_volatile",
-            "cmf_20": -0.1796,
-            "breadth_20": 1.0,
-            "breadth_120": 1.0,
-            "avg_drawdown": 0.3387,
+            "bull_bear": "bear",
+            "cmf_20": -0.1775,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 2
           },
           "stocks": [
@@ -276,15 +276,15 @@
               "name": "力成",
               "ticker": "6239.TW",
               "indicators": {
-                "close": 281.0,
-                "ma20": 279.75,
-                "ma120": 276.15,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 371.68,
-                "drawdown": 0.244,
-                "cmf_20": -0.2371,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.235,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -292,26 +292,26 @@
               "name": "華東",
               "ticker": "8110.TW",
               "indicators": {
-                "close": 48.4,
-                "ma20": 45.03,
-                "ma120": 48.16,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 85.44,
-                "drawdown": 0.4335,
-                "cmf_20": -0.1221,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.1201,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
         }
       ],
       "summary": {
-        "bull_bear": "bull_volatile",
-        "cmf_20": -0.2395,
-        "breadth_20": 0.4615,
-        "breadth_120": 0.6154,
-        "avg_drawdown": 0.2244,
+        "bull_bear": "bear",
+        "cmf_20": -0.2673,
+        "breadth_20": 0.0,
+        "breadth_120": 0.0,
+        "avg_drawdown": null,
         "stock_count": 13
       }
     },
@@ -324,11 +324,11 @@
           "id": "semi_wafer",
           "name": "半導體矽晶圓",
           "summary": {
-            "bull_bear": "bull_volatile",
-            "cmf_20": -0.1176,
-            "breadth_20": 1.0,
-            "breadth_120": 1.0,
-            "avg_drawdown": 0.295,
+            "bull_bear": "bear",
+            "cmf_20": -0.1081,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 4
           },
           "stocks": [
@@ -337,15 +337,15 @@
               "name": "環球晶",
               "ticker": "6488.TWO",
               "indicators": {
-                "close": 945.0,
-                "ma20": 941.65,
-                "ma120": 907.6,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 1509.17,
-                "drawdown": 0.3738,
-                "cmf_20": -0.0781,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.0722,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -353,15 +353,15 @@
               "name": "中美晶",
               "ticker": "5483.TWO",
               "indicators": {
-                "close": 189.0,
-                "ma20": 182.43,
-                "ma120": 170.85,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 275.03,
-                "drawdown": 0.3128,
-                "cmf_20": -0.16,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.1611,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -369,15 +369,15 @@
               "name": "台勝科",
               "ticker": "3532.TW",
               "indicators": {
-                "close": 454.0,
-                "ma20": 419.15,
-                "ma120": 329.46,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 523.0,
-                "drawdown": 0.1319,
-                "cmf_20": -0.0978,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_volatile"
+                "drawdown": null,
+                "cmf_20": -0.087,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -385,15 +385,15 @@
               "name": "合晶",
               "ticker": "6182.TWO",
               "indicators": {
-                "close": 121.0,
-                "ma20": 111.5,
-                "ma120": 97.03,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 189.5,
-                "drawdown": 0.3615,
-                "cmf_20": -0.1345,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.1119,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -402,11 +402,11 @@
           "id": "compound_semi",
           "name": "化合物半導體 / 磊晶",
           "summary": {
-            "bull_bear": "bull_stable",
-            "cmf_20": 0.1192,
-            "breadth_20": 1.0,
-            "breadth_120": 1.0,
-            "avg_drawdown": 0.1373,
+            "bull_bear": "bear",
+            "cmf_20": 0.1078,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 2
           },
           "stocks": [
@@ -415,15 +415,15 @@
               "name": "嘉晶",
               "ticker": "3016.TW",
               "indicators": {
-                "close": 172.5,
-                "ma20": 116.44,
-                "ma120": 107.06,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 172.5,
-                "drawdown": 0.0,
-                "cmf_20": 0.4314,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_stable"
+                "drawdown": null,
+                "cmf_20": 0.3834,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -431,26 +431,26 @@
               "name": "漢磊",
               "ticker": "3707.TWO",
               "indicators": {
-                "close": 72.9,
-                "ma20": 63.42,
-                "ma120": 69.69,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 100.5,
-                "drawdown": 0.2746,
-                "cmf_20": -0.1931,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.1678,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
         }
       ],
       "summary": {
-        "bull_bear": "bull_volatile",
-        "cmf_20": -0.0387,
-        "breadth_20": 1.0,
-        "breadth_120": 1.0,
-        "avg_drawdown": 0.2424,
+        "bull_bear": "bear",
+        "cmf_20": -0.0361,
+        "breadth_20": 0.0,
+        "breadth_120": 0.0,
+        "avg_drawdown": null,
         "stock_count": 6
       }
     },
@@ -464,10 +464,10 @@
           "name": "整合 / MLCC",
           "summary": {
             "bull_bear": "bear",
-            "cmf_20": -0.2139,
-            "breadth_20": 0.3333,
-            "breadth_120": 0.3333,
-            "avg_drawdown": 0.4117,
+            "cmf_20": -0.1963,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 3
           },
           "stocks": [
@@ -476,15 +476,15 @@
               "name": "國巨",
               "ticker": "2327.TW",
               "indicators": {
-                "close": 548.0,
-                "ma20": 554.45,
-                "ma120": 623.33,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 1140.0,
-                "drawdown": 0.5193,
-                "cmf_20": -0.2622,
+                "drawdown": null,
+                "cmf_20": -0.2053,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -492,15 +492,15 @@
               "name": "華新科",
               "ticker": "2492.TW",
               "indicators": {
-                "close": 302.0,
-                "ma20": 306.27,
-                "ma120": 311.55,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 613.74,
-                "drawdown": 0.5079,
-                "cmf_20": -0.135,
+                "drawdown": null,
+                "cmf_20": -0.1152,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -508,15 +508,15 @@
               "name": "禾伸堂",
               "ticker": "3026.TW",
               "indicators": {
-                "close": 796.0,
-                "ma20": 752.6,
-                "ma120": 600.93,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 1005.0,
-                "drawdown": 0.208,
-                "cmf_20": -0.2445,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.2685,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -525,11 +525,11 @@
           "id": "resistor",
           "name": "晶片電阻 / 保護元件",
           "summary": {
-            "bull_bear": "bull_volatile",
-            "cmf_20": -0.1506,
-            "breadth_20": 0.3333,
-            "breadth_120": 0.6667,
-            "avg_drawdown": 0.3198,
+            "bull_bear": "bear",
+            "cmf_20": -0.123,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 3
           },
           "stocks": [
@@ -538,15 +538,15 @@
               "name": "大毅",
               "ticker": "2478.TW",
               "indicators": {
-                "close": 117.5,
-                "ma20": 120.62,
-                "ma120": 129.32,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 239.33,
-                "drawdown": 0.509,
-                "cmf_20": -0.2735,
+                "drawdown": null,
+                "cmf_20": -0.2493,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -554,15 +554,15 @@
               "name": "興勤",
               "ticker": "2428.TW",
               "indicators": {
-                "close": 251.5,
-                "ma20": 253.95,
-                "ma120": 242.96,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 335.46,
-                "drawdown": 0.2503,
-                "cmf_20": -0.3252,
+                "drawdown": null,
+                "cmf_20": -0.2708,
                 "above_ma20": false,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -570,15 +570,15 @@
               "name": "光頡",
               "ticker": "3624.TWO",
               "indicators": {
-                "close": 140.0,
-                "ma20": 113.17,
-                "ma120": 96.59,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 175.05,
-                "drawdown": 0.2002,
-                "cmf_20": 0.147,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": 0.1512,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -588,10 +588,10 @@
           "name": "電感 / 射頻元件",
           "summary": {
             "bull_bear": "bear",
-            "cmf_20": -0.1979,
-            "breadth_20": 0.6667,
-            "breadth_120": 0.3333,
-            "avg_drawdown": 0.3726,
+            "cmf_20": -0.1482,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 3
           },
           "stocks": [
@@ -600,15 +600,15 @@
               "name": "臺慶科",
               "ticker": "3357.TWO",
               "indicators": {
-                "close": 203.0,
-                "ma20": 206.7,
-                "ma120": 227.93,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 342.11,
-                "drawdown": 0.4066,
-                "cmf_20": -0.2352,
+                "drawdown": null,
+                "cmf_20": -0.2126,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -616,15 +616,15 @@
               "name": "佳邦",
               "ticker": "6284.TWO",
               "indicators": {
-                "close": 77.0,
-                "ma20": 76.72,
-                "ma120": 86.27,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 121.66,
-                "drawdown": 0.3671,
-                "cmf_20": -0.3112,
-                "above_ma20": true,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "drawdown": null,
+                "cmf_20": -0.2292,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -632,15 +632,15 @@
               "name": "鈞寶",
               "ticker": "6155.TW",
               "indicators": {
-                "close": 64.0,
-                "ma20": 56.94,
-                "ma120": 61.45,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 97.59,
-                "drawdown": 0.3442,
-                "cmf_20": -0.0474,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_weak"
+                "drawdown": null,
+                "cmf_20": -0.0027,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -650,10 +650,10 @@
           "name": "電解電容 / 固態電容",
           "summary": {
             "bull_bear": "bear",
-            "cmf_20": -0.3247,
+            "cmf_20": -0.3165,
             "breadth_20": 0.0,
             "breadth_120": 0.0,
-            "avg_drawdown": 0.5216,
+            "avg_drawdown": null,
             "stock_count": 3
           },
           "stocks": [
@@ -662,15 +662,15 @@
               "name": "鈺邦",
               "ticker": "6449.TW",
               "indicators": {
-                "close": 205.5,
-                "ma20": 219.7,
-                "ma120": 260.72,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 458.46,
-                "drawdown": 0.5518,
-                "cmf_20": -0.3685,
+                "drawdown": null,
+                "cmf_20": -0.3512,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -678,15 +678,15 @@
               "name": "立隆電",
               "ticker": "2472.TW",
               "indicators": {
-                "close": 213.0,
-                "ma20": 215.8,
-                "ma120": 262.77,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 446.72,
-                "drawdown": 0.5232,
-                "cmf_20": -0.2127,
+                "drawdown": null,
+                "cmf_20": -0.2105,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -694,15 +694,15 @@
               "name": "凱美",
               "ticker": "2375.TW",
               "indicators": {
-                "close": 117.5,
-                "ma20": 121.0,
-                "ma120": 133.33,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 230.24,
-                "drawdown": 0.4897,
-                "cmf_20": -0.393,
+                "drawdown": null,
+                "cmf_20": -0.3878,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -711,11 +711,11 @@
           "id": "material",
           "name": "材料 / 通路",
           "summary": {
-            "bull_bear": "neutral",
-            "cmf_20": -0.209,
-            "breadth_20": 0.5,
-            "breadth_120": 0.5,
-            "avg_drawdown": 0.336,
+            "bull_bear": "bear",
+            "cmf_20": -0.2437,
+            "breadth_20": 0.0,
+            "breadth_120": 0.0,
+            "avg_drawdown": null,
             "stock_count": 2
           },
           "stocks": [
@@ -724,15 +724,15 @@
               "name": "信昌電",
               "ticker": "6173.TWO",
               "indicators": {
-                "close": 297.5,
-                "ma20": 286.05,
-                "ma120": 207.67,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 348.19,
-                "drawdown": 0.1456,
-                "cmf_20": -0.1231,
-                "above_ma20": true,
-                "above_ma120": true,
-                "bull_bear": "bull_volatile"
+                "drawdown": null,
+                "cmf_20": -0.1192,
+                "above_ma20": false,
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             },
             {
@@ -740,15 +740,15 @@
               "name": "日電貿",
               "ticker": "3090.TW",
               "indicators": {
-                "close": 161.0,
-                "ma20": 166.28,
-                "ma120": 183.73,
+                "close": NaN,
+                "ma20": NaN,
+                "ma120": null,
                 "high_1y": 340.0,
-                "drawdown": 0.5265,
-                "cmf_20": -0.295,
+                "drawdown": null,
+                "cmf_20": -0.3682,
                 "above_ma20": false,
-                "above_ma120": false,
-                "bull_bear": "bear"
+                "above_ma120": null,
+                "bull_bear": "unknown"
               }
             }
           ]
@@ -756,10 +756,10 @@
       ],
       "summary": {
         "bull_bear": "bear",
-        "cmf_20": -0.22,
-        "breadth_20": 0.3571,
-        "breadth_120": 0.3571,
-        "avg_drawdown": 0.3964,
+        "cmf_20": -0.2028,
+        "breadth_20": 0.0,
+        "breadth_120": 0.0,
+        "avg_drawdown": null,
         "stock_count": 14
       }
     }
